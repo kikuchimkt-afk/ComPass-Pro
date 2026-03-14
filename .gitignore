@@ -1,0 +1,16 @@
+# Development tools
+.agents/
+
+# Local files
+start-server.bat
+extract_writing.py
+writing_extracted.txt
+
+# OS files
+Thumbs.db
+.DS_Store
+desktop.ini
+
+# Temp
+*.tmp
+*.bak

@@ -730,9 +730,11 @@ ${getPrintStyles(minWords, maxWords)}
         const dropzone = $('chunkDropzone');
         const checkBtn = $('chunkCheckBtn');
         let placed = [];
+        let checked = false;
 
         pool.querySelectorAll('.chunk-piece').forEach(piece => {
             piece.addEventListener('click', () => {
+                if (checked) return;
                 const text = piece.dataset.text;
                 placed.push(text);
                 piece.classList.add('placed');
@@ -742,6 +744,7 @@ ${getPrintStyles(minWords, maxWords)}
         });
 
         function updateDropzone() {
+            if (checked) return;
             if (placed.length === 0) {
                 dropzone.innerHTML = '<span style="color:var(--text-secondary);font-size:0.78rem;opacity:0.5">ここにチャンクを並べる</span>';
             } else {
@@ -750,6 +753,7 @@ ${getPrintStyles(minWords, maxWords)}
                 ).join('');
                 dropzone.querySelectorAll('.chunk-piece').forEach(p => {
                     p.addEventListener('click', () => {
+                        if (checked) return;
                         const idx = parseInt(p.dataset.placed);
                         const text = placed[idx];
                         placed.splice(idx, 1);
@@ -768,13 +772,21 @@ ${getPrintStyles(minWords, maxWords)}
             checkBtn.style.display = placed.length === chunk.pieces.length ? '' : 'none';
         }
 
-        checkBtn.addEventListener('click', () => {
+        checkBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (checked) return;
+            checked = true;
+
             const userAnswer = placed.join(' ');
             const correct = userAnswer === chunk.answer;
             step2ChunkAnswers.push(correct);
 
             dropzone.classList.remove('active');
             dropzone.classList.add(correct ? 'correct' : 'wrong');
+            // Freeze dropzone - make pieces non-interactive
+            dropzone.querySelectorAll('.chunk-piece').forEach(p => {
+                p.style.pointerEvents = 'none';
+            });
             checkBtn.style.display = 'none';
 
             $('chunkResult').innerHTML = `
