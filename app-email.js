@@ -85,15 +85,27 @@
 
     // ===== THEME SELECTOR =====
     function renderThemeSelector() {
-        const sel = $('themeSelect');
-        sel.innerHTML = EMAIL_THEMES.map(t =>
-            `<option value="${t.id}" ${t.id === currentThemeId ? 'selected' : ''}>${t.title}　${t.exam}</option>`
-        ).join('');
-        sel.addEventListener('change', () => {
-            currentThemeId = parseInt(sel.value);
+        const container = $('themeSelector');
+        if (!container) return;
+        container.innerHTML = `
+            <div class="theme-select-row">
+                <select class="theme-select" id="themeSelect">
+                    ${EMAIL_THEMES.map(t =>
+                        `<option value="${t.id}" ${t.id === currentThemeId ? 'selected' : ''}>${t.title}　${t.exam}</option>`
+                    ).join('')}
+                </select>
+                <button class="print-btn" id="jaToggle" title="日本語訳表示">
+                    <span class="material-symbols-rounded">translate</span>
+                </button>
+            </div>
+        `;
+        $('themeSelect').addEventListener('change', () => {
+            currentThemeId = parseInt($('themeSelect').value);
             resetSelections();
             renderCurrentStep();
         });
+        // Re-init JA toggle
+        initJaToggle();
     }
 
     function resetSelections() {
@@ -362,18 +374,15 @@
     function renderChunkExercise(theme) {
         const container = $('step2Chunks');
         if (!container) return;
+
         // Build chunk exercises from opinions and questions
         const exercises = [];
-
-        // Opinion chunk
         const agreeOp = theme.opinions.agree;
         exercises.push({
             sentenceJa: agreeOp.jaText,
             answer: `I think ${agreeOp.text}.`,
             pieces: ['I think', ...agreeOp.chunks, '.']
         });
-
-        // Reason chunk  
         if (theme.reasons.length > 0) {
             const r = theme.reasons[0];
             exercises.push({
@@ -382,8 +391,6 @@
                 pieces: [...r.chunks, '.']
             });
         }
-
-        // Question chunk
         if (theme.questions.length > 0) {
             const q = theme.questions[0];
             exercises.push({
@@ -394,74 +401,134 @@
         }
 
         let currentIdx = 0;
+        let chunkAnswers = [];
 
         function renderChunk(idx) {
+            // Update progress
+            const progressBar = $('step2Progress');
+            const progressText = $('step2ProgressText');
+            if (progressBar) progressBar.style.width = (idx / exercises.length * 100) + '%';
+            if (progressText) progressText.textContent = `${Math.min(idx + 1, exercises.length)} / ${exercises.length}`;
+
             if (idx >= exercises.length) {
-                container.innerHTML = '<div class="chunk-complete fade-in" style="text-align:center;padding:24px;color:var(--color-merit)"><span class="material-symbols-rounded" style="font-size:48px">check_circle</span><div style="margin-top:8px;font-weight:700">全チャンク完了！</div></div>';
+                container.innerHTML = `
+                    <div class="score-display">
+                        <div class="score-num">${chunkAnswers.filter(Boolean).length} / ${exercises.length}</div>
+                        <div class="score-label">チャンク並べ替え完了！</div>
+                    </div>
+                    <div class="btn-group" style="justify-content:center">
+                        <button class="btn btn-secondary" id="step2ChunkReset">
+                            <span class="material-symbols-rounded">refresh</span> もう一度
+                        </button>
+                    </div>
+                `;
+                $('step2ChunkReset').addEventListener('click', () => {
+                    chunkAnswers = [];
+                    renderChunk(0);
+                });
+                if (progressBar) progressBar.style.width = '100%';
+                if (progressText) progressText.textContent = `${exercises.length} / ${exercises.length}`;
                 return;
             }
+
             const chunk = exercises[idx];
             const shuffled = shuffleArray(chunk.pieces);
             let placed = [];
+            let checked = false;
 
             container.innerHTML = `
-                <div class="chunk-counter" style="text-align:right;font-size:0.75rem;color:var(--text-secondary)">${idx + 1} / ${exercises.length}</div>
-                <div class="chunk-sentence-ja" style="padding:10px 14px;border-left:3px solid var(--color-intro);margin-bottom:12px;font-size:0.88rem;color:var(--text-secondary);line-height:1.6">${chunk.sentenceJa}</div>
-                <div class="chunk-dropzone" id="chunkDropzone" style="min-height:48px;border:2px dashed var(--border);border-radius:8px;padding:12px;margin-bottom:12px;display:flex;flex-wrap:wrap;gap:6px;cursor:pointer"></div>
-                <div class="chunk-pieces" id="chunkPieces" style="display:flex;flex-wrap:wrap;gap:6px"></div>
-                <div class="chunk-feedback" id="chunkFeedback" style="margin-top:12px"></div>
+                <div class="chunk-exercise fade-in">
+                    <div class="chunk-ja">${chunk.sentenceJa}</div>
+                    <div class="chunk-dropzone" id="chunkDropzone">
+                        <span style="color:var(--text-secondary);font-size:0.78rem;opacity:0.5">ここにチャンクを並べる</span>
+                    </div>
+                    <div class="chunk-pool" id="chunkPool">
+                        ${shuffled.map((p, i) => `<button class="chunk-piece" data-idx="${i}" data-text="${escapeHtml(p)}">${p}</button>`).join('')}
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn btn-primary" id="chunkCheckBtn" style="display:none">
+                            <span class="material-symbols-rounded">check</span> 確認
+                        </button>
+                    </div>
+                    <div id="chunkResult"></div>
+                </div>
             `;
 
+            const pool = $('chunkPool');
             const dropzone = $('chunkDropzone');
-            const piecesContainer = $('chunkPieces');
+            const checkBtn = $('chunkCheckBtn');
 
-            function render() {
-                dropzone.innerHTML = placed.length === 0 ? '<span style="font-size:0.82rem;color:var(--text-secondary);opacity:0.5">ここにチャンクを並べる</span>' :
-                    placed.map((p, i) => `<span class="chunk-piece placed" data-placed="${i}">${p}</span>`).join('');
-                piecesContainer.innerHTML = shuffled.filter(p => !placed.includes(p)).map(p =>
-                    `<span class="chunk-piece" data-piece="${p}">${p}</span>`
-                ).join('');
-
-                // Click to add
-                piecesContainer.querySelectorAll('.chunk-piece').forEach(el => {
-                    el.addEventListener('click', () => {
-                        placed.push(el.dataset.piece);
-                        render();
-                        checkChunk(chunk, placed, idx);
-                    });
+            pool.querySelectorAll('.chunk-piece').forEach(piece => {
+                piece.addEventListener('click', () => {
+                    if (checked) return;
+                    placed.push(piece.dataset.text);
+                    piece.classList.add('placed');
+                    piece.style.display = 'none';
+                    updateDropzone();
                 });
+            });
 
-                // Click to remove from dropzone
-                dropzone.querySelectorAll('.chunk-piece.placed').forEach(el => {
-                    el.addEventListener('click', () => {
-                        placed.splice(parseInt(el.dataset.placed), 1);
-                        render();
+            function updateDropzone() {
+                if (checked) return;
+                if (placed.length === 0) {
+                    dropzone.innerHTML = '<span style="color:var(--text-secondary);font-size:0.78rem;opacity:0.5">ここにチャンクを並べる</span>';
+                } else {
+                    dropzone.innerHTML = placed.map((t, i) =>
+                        `<button class="chunk-piece placed" data-placed="${i}">${t}</button>`
+                    ).join('');
+                    dropzone.querySelectorAll('.chunk-piece').forEach(p => {
+                        p.addEventListener('click', () => {
+                            if (checked) return;
+                            const pidx = parseInt(p.dataset.placed);
+                            const text = placed[pidx];
+                            placed.splice(pidx, 1);
+                            pool.querySelectorAll('.chunk-piece').forEach(pp => {
+                                if (pp.dataset.text === text && pp.style.display === 'none') {
+                                    pp.style.display = '';
+                                    pp.classList.remove('placed');
+                                }
+                            });
+                            updateDropzone();
+                        });
                     });
-                });
+                }
+                dropzone.classList.toggle('active', placed.length > 0);
+                checkBtn.style.display = placed.length === chunk.pieces.length ? '' : 'none';
             }
 
-            render();
-        }
+            checkBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (checked) return;
+                checked = true;
 
-        function checkChunk(chunk, placed, idx) {
-            const fb = $('chunkFeedback');
-            const built = placed.join(' ').replace(/ \./g, '.').replace(/ \?/g, '?');
-            const answer = chunk.answer;
+                const userAnswer = placed.join(' ').replace(/ \./g, '.').replace(/ \?/g, '?');
+                const correct = userAnswer === chunk.answer;
+                chunkAnswers.push(correct);
 
-            if (placed.length < chunk.pieces.length) return;
+                dropzone.classList.remove('active');
+                dropzone.classList.add(correct ? 'correct' : 'wrong');
+                dropzone.querySelectorAll('.chunk-piece').forEach(p => {
+                    p.style.pointerEvents = 'none';
+                });
+                checkBtn.style.display = 'none';
 
-            if (built === answer) {
-                fb.innerHTML = `<div class="chunk-result correct fade-in" style="padding:12px;background:rgba(34,197,94,0.1);border-radius:8px;border-left:3px solid #22c55e">
-                    <span style="color:#22c55e;font-weight:700">✅ 正解！</span>
-                    <div style="margin-top:4px;font-size:0.85rem;color:var(--text-secondary)">${chunk.answer}</div>
-                </div>`;
-                setTimeout(() => renderChunk(idx + 1), 1500);
-            } else {
-                fb.innerHTML = `<div class="chunk-result wrong fade-in" style="padding:12px;background:rgba(239,68,68,0.1);border-radius:8px;border-left:3px solid #ef4444">
-                    <span style="color:#ef4444;font-weight:700">❌ もう一度</span>
-                    <div style="margin-top:4px;font-size:0.85rem;color:var(--text-secondary)">正解: ${chunk.answer}</div>
-                </div>`;
-            }
+                $('chunkResult').innerHTML = `
+                    <div class="result-banner ${correct ? 'success' : 'error'}">
+                        <span class="material-symbols-rounded">${correct ? 'check_circle' : 'cancel'}</span>
+                        ${correct ? '正解！🎉' : '不正解'}
+                    </div>
+                    ${!correct ? `<div class="model-answer"><div class="label">正解</div><div class="text-en">${chunk.answer}</div></div>` : ''}
+                    <div class="btn-group">
+                        <button class="btn btn-primary" id="chunkNextBtn">
+                            <span class="material-symbols-rounded">arrow_forward</span> 次へ
+                        </button>
+                    </div>
+                `;
+
+                $('chunkNextBtn').addEventListener('click', () => {
+                    renderChunk(idx + 1);
+                });
+            });
         }
 
         renderChunk(0);

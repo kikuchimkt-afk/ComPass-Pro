@@ -196,33 +196,11 @@
             font-style: italic;
         }
 
-        /* チャンクピース */
-        .chunk-piece {
-            display: inline-block;
-            padding: 6px 12px;
-            background: rgba(var(--accent-rgb), 0.1);
-            border: 1px solid rgba(var(--accent-rgb), 0.3);
-            border-radius: 20px;
-            font-size: 0.85rem;
-            cursor: pointer;
-            transition: all 0.2s;
-            user-select: none;
-        }
-
-        .chunk-piece:hover {
-            background: rgba(var(--accent-rgb), 0.2);
-            transform: scale(1.05);
-        }
-
-        .chunk-piece.placed {
-            background: rgba(var(--accent-rgb), 0.15);
-            border-color: var(--accent);
-        }
     </style>
 </head>
 
 <body>
-    <div class="app-wrapper">
+    <div id="app">
         <!-- Header -->
         <header class="app-header">
             <div class="header-inner">
@@ -265,12 +243,7 @@
         </nav>
 
         <!-- Theme Selector -->
-        <div class="theme-selector">
-            <select id="themeSelect" class="theme-dropdown"></select>
-            <button id="jaToggle" class="icon-btn" title="日本語訳表示">
-                <span class="material-symbols-rounded">translate</span>
-            </button>
-        </div>
+        <div class="theme-selector" id="themeSelector"></div>
 
         <!-- STEP 1: テンプレート学習 -->
         <div class="step-pane active" id="step1">
@@ -340,6 +313,12 @@
                     <div class="card-title">
                         <span class="material-symbols-rounded">sort</span>
                         チャンク並べ替え
+                    </div>
+                    <div class="progress-wrap">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="step2Progress"></div>
+                        </div>
+                        <span class="progress-text" id="step2ProgressText">1 / 3</span>
                     </div>
                     <div id="step2Chunks"></div>
                 </div>
@@ -499,7 +478,7 @@
         <footer class="app-footer">
             本アプリは学習支援を目的としています。公益財団法人 日本英語検定協会とは一切関係ありません。
         </footer>
-    </div>
+    </div><!-- /#app -->
 
     <script src="data-pre2-email.js"></script>
     <script src="app-email.js"></script>
