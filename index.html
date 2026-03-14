@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ComPass Pro — 英検ライティング練習</title>
+    <meta name="description" content="ComPass Pro - 英検ライティング練習アプリ。各級の英文要約・意見文を3ステップで学習">
+    <link rel="stylesheet" href="top.css">
+</head>
+
+<body>
+    <div class="app-container">
+
+        <!-- Hero Section -->
+        <header class="hero">
+            <div class="hero-bg"></div>
+            <div class="hero-content">
+                <div class="hero-badge">WRITING PRACTICE</div>
+                <h1 class="hero-title">ComPass Pro</h1>
+                <p class="hero-description">英検ライティング問題を3ステップでマスター</p>
+            </div>
+        </header>
+
+        <!-- Grade Selection -->
+        <main class="main-content">
+            <section class="section" id="gradeSection">
+                <div class="section-header">
+                    <h2 class="section-title">レベルを選択</h2>
+                    <p class="section-subtitle">学習したいレベルを選んでください</p>
+                </div>
+                <div class="grade-grid" id="gradeGrid"></div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>ComPass Pro — Writing Practice</p>
+        </footer>
+    </div>
+
+    <script>
+        (function () {
+            'use strict';
+
+            const GRADES = [
+                {
+                    id: 'grade-pre1',
+                    name: 'CEFR B2（準1級相当）',
+                    nameEn: 'CSE 2304',
+                    icon: 'B2',
+                    color: '#f59e0b',
+                    colorRgb: '245, 158, 11',
+                    href: 'pre1.html',
+                    taskTypes: '英文要約',
+                    status: '11テーマ収録'
+                },
+                {
+                    id: 'grade2',
+                    name: 'CEFR B1（２級相当）',
+                    nameEn: 'CSE 1980',
+                    icon: 'B1',
+                    color: '#4f8cff',
+                    colorRgb: '79, 140, 255',
+                    href: 'grade2.html',
+                    taskTypes: '英文要約',
+                    status: '6テーマ収録'
+                },
+                {
+                    id: 'grade-pre2plus',
+                    name: 'CEFR A2-B1（準2級プラス相当）',
+                    nameEn: 'CSE 1878',
+                    icon: 'A2+',
+                    color: '#8b5cf6',
+                    colorRgb: '139, 92, 246',
+                    href: 'pre2plus.html',
+                    taskTypes: '英文要約',
+                    status: '16テーマ収録'
+                },
+                {
+                    id: 'grade-pre2',
+                    name: 'CEFR A2（準2級相当）',
+                    nameEn: 'CSE 1728',
+                    icon: 'A2',
+                    color: '#10b981',
+                    colorRgb: '16, 185, 129',
+                    href: 'pre2.html',
+                    taskTypes: '意見文・Eメール',
+                    status: '各6テーマ',
+                    links: [
+                        { label: '意見文', href: 'pre2.html' },
+                        { label: 'Eメール', href: 'pre2-email.html' }
+                    ]
+                },
+                {
+                    id: 'grade3',
+                    name: 'CEFR A1（３級相当）',
+                    nameEn: 'CSE 1456',
+                    icon: 'A1',
+                    color: '#f472b6',
+                    colorRgb: '244, 114, 182',
+                    href: null,
+                    taskTypes: '意見文',
+                    status: '準備中'
+                }
+            ];
+
+            const grid = document.getElementById('gradeGrid');
+
+            GRADES.forEach(grade => {
+                if (grade.links && grade.links.length > 1) {
+                    // 複数リンクのカード
+                    const card = document.createElement('div');
+                    card.className = 'grade-card';
+                    card.style.setProperty('--grade-color', grade.color);
+                    card.style.setProperty('--grade-color-rgb', grade.colorRgb);
+                    card.style.cursor = 'default';
+
+                    card.innerHTML = `
+          <div class="grade-icon">${grade.icon}</div>
+          <div class="grade-name">${grade.name}</div>
+          <div class="grade-name-en">${grade.nameEn}</div>
+          <div class="grade-task-type">${grade.taskTypes}</div>
+          <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;justify-content:center">
+            ${grade.links.map(l => `<a href="${l.href}" style="display:inline-flex;align-items:center;gap:4px;padding:4px 12px;border-radius:16px;font-size:0.75rem;font-weight:600;background:rgba(var(--grade-color-rgb),0.15);color:var(--grade-color);text-decoration:none;border:1px solid rgba(var(--grade-color-rgb),0.3);transition:all 0.2s">${l.label}</a>`).join('')}
+          </div>
+          <div class="grade-count">
+            <span class="grade-count-dot"></span>
+            ${grade.status}
+          </div>
+        `;
+                    grid.appendChild(card);
+                } else {
+                    const card = document.createElement(grade.href ? 'a' : 'div');
+                    card.className = 'grade-card' + (grade.href ? '' : ' disabled');
+                    if (grade.href) card.href = grade.href;
+                    card.style.setProperty('--grade-color', grade.color);
+                    card.style.setProperty('--grade-color-rgb', grade.colorRgb);
+
+                    card.innerHTML = `
+          <div class="grade-icon">${grade.icon}</div>
+          <div class="grade-name">${grade.name}</div>
+          <div class="grade-name-en">${grade.nameEn}</div>
+          <div class="grade-task-type">${grade.taskTypes}</div>
+          <div class="grade-count">
+            <span class="grade-count-dot"></span>
+            ${grade.status}
+          </div>
+        `;
+                    grid.appendChild(card);
+                }
+            });
+        })();
+    </script>
+</body>
+
+</html>

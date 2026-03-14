@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ComPass Pro AI採点 セットアップガイド</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Noto+Sans+JP:wght@400;500;700;800&display=swap"
+        rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+        rel="stylesheet">
+    <style>
+        :root {
+            --accent: #6c63ff;
+            --accent-light: #a78bfa;
+            --success: #34d399;
+            --warning: #fbbf24;
+            --bg: #f8f7ff;
+            --card: #ffffff;
+            --text: #1e1b4b;
+            --text-sub: #64648a;
+            --shadow: 0 2px 12px rgba(108, 99, 255, 0.08);
+            --radius: 14px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', 'Noto Sans JP', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            max-width: 680px;
+            margin: 0 auto;
+            padding: 20px 16px 60px;
+        }
+
+        .header {
+            text-align: center;
+            padding: 32px 20px;
+            background: linear-gradient(135deg, #6c63ff, #a78bfa);
+            border-radius: 20px;
+            color: #fff;
+            margin-bottom: 28px;
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 6px;
+        }
+
+        .header p {
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
+
+        .time-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            margin-top: 10px;
+        }
+
+        .step-card {
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 24px 22px;
+            margin-bottom: 16px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(108, 99, 255, 0.08);
+        }
+
+        .step-num {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6c63ff, #a78bfa);
+            color: #fff;
+            font-weight: 800;
+            font-size: 1rem;
+            margin-bottom: 12px;
+        }
+
+        .step-card h2 {
+            font-size: 1.1rem;
+            font-weight: 800;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sub-step {
+            padding: 14px 16px;
+            background: #f5f3ff;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            border-left: 4px solid var(--accent);
+        }
+
+        .sub-step:last-child {
+            margin-bottom: 0;
+        }
+
+        .sub-step .num {
+            font-weight: 800;
+            color: var(--accent);
+            font-size: 0.85rem;
+        }
+
+        .sub-step p {
+            font-size: 0.88rem;
+            margin-top: 4px;
+        }
+
+        .code-block {
+            background: #1e1b4b;
+            color: #e0e7ff;
+            padding: 14px 16px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.78rem;
+            overflow-x: auto;
+            margin: 10px 0;
+            word-break: break-all;
+        }
+
+        .link-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--accent);
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 0.88rem;
+            margin: 10px 4px 4px 0;
+            transition: all 0.2s;
+        }
+
+        .link-btn:hover {
+            filter: brightness(1.1);
+            transform: translateY(-1px);
+        }
+
+        .link-btn.green {
+            background: var(--success);
+            color: #000;
+        }
+
+        .warning-box {
+            background: #fef3c7;
+            border: 1px solid #fbbf24;
+            border-radius: 10px;
+            padding: 12px 16px;
+            font-size: 0.82rem;
+            margin: 12px 0;
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .warning-box .material-symbols-rounded {
+            color: #f59e0b;
+            font-size: 20px;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .success-box {
+            background: #d1fae5;
+            border: 1px solid #34d399;
+            border-radius: 10px;
+            padding: 12px 16px;
+            font-size: 0.82rem;
+            margin: 12px 0;
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .success-box .material-symbols-rounded {
+            color: #059669;
+            font-size: 20px;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .screenshot {
+            width: 100%;
+            border-radius: 10px;
+            border: 1px solid rgba(108, 99, 255, 0.15);
+            margin: 12px 0;
+        }
+
+        .arrow-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #ede9fe;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--accent);
+            margin: 8px 0;
+        }
+
+        .arrow-label .material-symbols-rounded {
+            font-size: 18px;
+        }
+
+        .divider {
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent-light), transparent);
+            margin: 8px 0;
+            border-radius: 1px;
+        }
+
+        .faq {
+            padding: 14px;
+            border: 1px solid rgba(108, 99, 255, 0.15);
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+
+        .faq summary {
+            font-weight: 700;
+            font-size: 0.88rem;
+            cursor: pointer;
+            color: var(--accent);
+        }
+
+        .faq p {
+            margin-top: 8px;
+            font-size: 0.82rem;
+            color: var(--text-sub);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="header">
+        <h1>✨ AI採点 セットアップガイド</h1>
+        <p>ComPass Pro の AI自動採点を使えるようにする手順です</p>
+        <div class="time-badge">
+            <span class="material-symbols-rounded" style="font-size:16px">schedule</span>
+            所要時間：約5分
+        </div>
+    </div>
+
+    <!-- STEP 1 -->
+    <div class="step-card">
+        <h2><span class="step-num">1</span> Gemini APIキーを取得する</h2>
+        <p style="font-size:0.85rem;color:var(--text-sub);margin-bottom:14px">
+            まず、GoogleのAI（Gemini）を使うための「鍵」を手に入れます。<br>
+            <strong>完全無料</strong>で取得できます。
+        </p>
+
+        <div class="sub-step">
+            <div class="num">① リンクを開く</div>
+            <p>下のボタンをクリックして、Google AI Studio を開きます。</p>
+            <a href="https://aistudio.google.com/apikey" target="_blank" class="link-btn">
+                <span class="material-symbols-rounded" style="font-size:18px">open_in_new</span>
+                Google AI Studio を開く
+            </a>
+            <div class="warning-box">
+                <span class="material-symbols-rounded">info</span>
+                <div>Googleアカウントでログインが必要です。普段使っているGoogleアカウントでOKです。</div>
+            </div>
+        </div>
+
+        <div class="sub-step">
+            <div class="num">② APIキーを作成する</div>
+            <p>開いたページで「<strong>APIキーを作成</strong>」（Create API key）ボタンをクリックします。</p>
+            <div class="arrow-label">
+                <span class="material-symbols-rounded">touch_app</span>
+                「Create API key」→ 「Create API key in new project」をクリック
+            </div>
+        </div>
+
+        <div class="sub-step">
+            <div class="num">③ APIキーをコピーする</div>
+            <p>表示されたAPIキー（<code>AIza...</code> で始まる長い文字列）を<strong>コピー</strong>します。</p>
+            <div class="arrow-label">
+                <span class="material-symbols-rounded">content_copy</span>
+                コピーアイコンをクリック → メモ帳に貼り付けて保存しておく
+            </div>
+            <div class="warning-box">
+                <span class="material-symbols-rounded">warning</span>
+                <div>このAPIキーは<strong>他の人に見せないでください</strong>。あなた専用の鍵です。</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- STEP 2 -->
+    <div class="step-card">
+        <h2><span class="step-num">2</span> Google Apps Scriptにコードを貼る</h2>
+        <p style="font-size:0.85rem;color:var(--text-sub);margin-bottom:14px">
+            次に、AIへの「橋渡し役」となるプログラムを設置します。<br>
+            コードをコピペするだけです。プログラミングの知識は不要です。
+        </p>
+
+        <div class="sub-step">
+            <div class="num">① Apps Script を開く</div>
+            <p>下のボタンから Google Apps Script を開きます。</p>
+            <a href="https://script.google.com/home/projects/create" target="_blank" class="link-btn">
+                <span class="material-symbols-rounded" style="font-size:18px">open_in_new</span>
+                Apps Script を開く（新規プロジェクト）
+            </a>
+        </div>
+
+        <div class="sub-step">
+            <div class="num">② コードを貼り付ける</div>
+            <p>エディタ画面が開くので：</p>
+            <div class="arrow-label">
+                <span class="material-symbols-rounded">select_all</span>
+                最初から書いてあるコード（<code>function myFunction(){}</code>）を<strong>全部消す</strong>
+            </div>
+            <div class="arrow-label">
+                <span class="material-symbols-rounded">content_paste</span>
+                <code>gas-grader.js</code> の中身を<strong>全部コピーして貼り付ける</strong>
+            </div>
+            <p style="margin-top:8px;font-size:0.82rem;color:var(--text-sub)">
+                <code>gas-grader.js</code> は ComPass Pro フォルダにあります。<br>
+                メモ帳やVS Codeで開いて、全選択(Ctrl+A) → コピー(Ctrl+C) → 貼り付け(Ctrl+V)
+            </p>
+        </div>
+
+        <div class="sub-step">
+            <div class="num">③ プロジェクト名を変更する（任意）</div>
+            <p>左上の「無題のプロジェクト」をクリックして「<strong>ComPass Pro Grader</strong>」に変更。</p>
+        </div>
+
+        <div class="sub-step">
+            <div class="num">④ 保存する</div>
+            <div class="arrow-label">
+                <span class="material-symbols-rounded">save</span>
+                <strong>Ctrl + S</strong> を押して保存（またはフロッピーアイコンをクリック）
+            </div>
+        </div>
+    </div>
+
+    <!-- STEP 3 -->
+    <div class="step-card">
+        <h2><span class="step-num">3</span> APIキーを安全に登録する</h2>
+        <p style="font-size:0.85rem;color:var(--text-sub);margin-bottom:14px">
+            Step 1で取得したAPIキーを、プログラムに安全に渡します。
+        </p>
+
+        <div class="sub-step">
+            <div class="num">① 設定画面を開く</div>
+            <p>Apps Script の左サイドバーにある<strong>⚙️歯車アイコン</strong>（プロジェクトの設定）をクリック。</p>
+            <div class="arrow-label">
+                <span class="material-symbols-rounded">settings</span>
+                左メニューの一番下にある「プロジェクトの設定」をクリック
+            </div>
+        </div>
+
+        <div class="sub-step">
+            <div class="num">② スクリプトプロパティを追加</div>
+            <p>画面を一番下までスクロールして「<strong>スクリプト プロパティ</strong>」セクションを見つけます。</p>
+            <div class="arrow-label">
+                <span class="material-symbols-rounded">add_circle</span>
+                「スクリプト プロパティを追加」をクリック
+            </div>
+            <p style="margin-top:8px">以下のように入力します：</p>
+            <table style="width:100%;border-collapse:collapse;margin:10px 0;font-size:0.85rem">
+                <tr style="background:#ede9fe">
+                    <th style="padding:10px 14px;text-align:left;border-radius:8px 0 0 0">プロパティ名</th>
+                    <th style="padding:10px 14px;text-align:left;border-radius:0 8px 0 0">値</th>
+                </tr>
+                <tr style="background:#f5f3ff">
+                    <td style="padding:10px 14px;font-family:monospace;font-weight:700;border-radius:0 0 0 8px">
+                        GEMINI_API_KEY</td>
+                    <td style="padding:10px 14px;border-radius:0 0 8px 0">Step 1でコピーしたAPIキーを貼り付け</td>
+                </tr>
+            </table>
+            <div class="arrow-label">
+                <span class="material-symbols-rounded">save</span>
+                「スクリプト プロパティを保存」をクリック
+            </div>
+        </div>
+    </div>
+
+    <!-- STEP 4 -->
+    <div class="step-card">
+        <h2><span class="step-num">4</span> ウェブアプリとして公開する</h2>
+        <p style="font-size:0.85rem;color:var(--text-sub);margin-bottom:14px">
+            作ったプログラムを、ComPass Proからアクセスできるように公開します。
+        </p>
+
+        <div class="sub-step">
+            <div class="num">① エディタに戻る</div>
+            <p>左サイドバーの<strong>&lt; &gt;</strong>（エディタ）をクリックしてコード画面に戻ります。</p>
+        </div>
+
+        <div class="sub-step">
+            <div class="num">② デプロイをクリック</div>
+            <p>画面右上の青い「<strong>デプロイ</strong>」ボタンをクリック → 「<strong>新しいデプロイ</strong>」を選択。</p>
+            <div class="arrow-label">
+                <span class="material-symbols-rounded">rocket_launch</span>
+                右上「デプロイ」→「新しいデプロイ」
+            </div>
+        </div>
+
+        <div class="sub-step">
+            <div class="num">③ 種類を選ぶ</div>
+            <p>「種類の選択」横の<strong>⚙️歯車アイコン</strong>をクリック → 「<strong>ウェブアプリ</strong>」を選択。</p>
+        </div>
+
+        <div class="sub-step">
+            <div class="num">④ アクセス設定を変更する</div>
+            <p>「<strong>アクセスできるユーザー</strong>」を「<strong>全員</strong>」に変更します。</p>
+            <div class="warning-box">
+                <span class="material-symbols-rounded">warning</span>
+                <div>「全員」に変更しないと、ComPass Proからアクセスできません。<br>
+                    必ず変更してください！</div>
+            </div>
+        </div>
+
+        <div class="sub-step">
+            <div class="num">⑤ デプロイする</div>
+            <div class="arrow-label">
+                <span class="material-symbols-rounded">rocket_launch</span>
+                「デプロイ」ボタンをクリック
+            </div>
+            <p style="margin-top:8px">初回は「アクセスを承認」を求められます：</p>
+            <div class="arrow-label">
+                <span class="material-symbols-rounded">person</span>
+                自分のGoogleアカウントを選択 → 「詳細」→「～（安全でないページ）に移動」→「許可」
+            </div>
+        </div>
+
+        <div class="sub-step">
+            <div class="num">⑥ URLをコピーする</div>
+            <p>「<strong>ウェブアプリ URL</strong>」が表示されるので、<strong>コピー</strong>します。</p>
+            <div class="code-block">https://script.google.com/macros/s/AKfycb.../exec</div>
+            <div class="arrow-label">
+                <span class="material-symbols-rounded">content_copy</span>
+                このURLをコピー！次のステップで使います
+            </div>
+        </div>
+    </div>
+
+    <!-- STEP 5 -->
+    <div class="step-card">
+        <h2><span class="step-num">5</span> ComPass Proに接続する</h2>
+        <p style="font-size:0.85rem;color:var(--text-sub);margin-bottom:14px">
+            最後のステップ！ComPass ProにURLを貼り付けるだけです。
+        </p>
+
+        <div class="sub-step">
+            <div class="num">① ComPass Proを開く</div>
+            <p>ComPass Proアプリを開いて、Step 2 または Step 3 に進みます。</p>
+        </div>
+
+        <div class="sub-step">
+            <div class="num">② AI採点ボタンをクリック</div>
+            <p>緑色の「<strong>✨ AI採点</strong>」ボタンをクリックします。</p>
+            <p>初回はセットアップ画面が表示されます。</p>
+        </div>
+
+        <div class="sub-step">
+            <div class="num">③ URLを貼り付けて保存</div>
+            <p>入力欄に、Step 4でコピーした<strong>ウェブアプリURL</strong>を貼り付けて「保存」をクリック。</p>
+            <div class="success-box">
+                <span class="material-symbols-rounded">check_circle</span>
+                <div><strong>設定完了！🎉</strong><br>もう一度「AI採点」を押すと、AIが要約を採点してくれます！</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FAQ -->
+    <div class="step-card">
+        <h2 style="margin-bottom:16px">
+            <span class="material-symbols-rounded" style="color:var(--accent);font-size:28px">help</span>
+            よくある質問
+        </h2>
+
+        <details class="faq">
+            <summary>💰 本当に無料ですか？</summary>
+            <p>はい！Gemini APIの無料枠（1分あたり15回のリクエスト）で十分使えます。
+                高校のクラス全員が同時に使っても問題ありません。</p>
+        </details>
+
+        <details class="faq">
+            <summary>🔒 APIキーは安全ですか？</summary>
+            <p>はい。APIキーはGoogle Apps Script のサーバー側に保存されるため、
+                生徒や第三者からは見えません。ComPass Pro のコードにはAPIキーは含まれません。</p>
+        </details>
+
+        <details class="faq">
+            <summary>❌ 「アクセスを承認」でエラーが出ます</summary>
+            <p>「このアプリは Google で確認されていません」と表示されたら：<br>
+                「詳細」をクリック → 「〜（安全ではないページ）に移動」をクリックしてください。
+                これは自分で作ったスクリプトなので安全です。</p>
+        </details>
+
+        <details class="faq">
+            <summary>🔄 URLを変更したいときは？</summary>
+            <p>ComPass Proでブラウザの開発者ツール（F12）→ Console に以下を入力：<br>
+                <code>localStorage.removeItem('writepass-gas-url')</code><br>
+                その後「AI採点」を押すと再設定できます。
+            </p>
+        </details>
+
+        <details class="faq">
+            <summary>📊 採点基準は何ですか？</summary>
+            <p>英検公式の4つの観点で採点します（各4点、合計16点満点）：<br>
+                ①内容 ②構成 ③語彙・パラフレーズ ④文法</p>
+        </details>
+    </div>
+
+</body>
+
+</html>
