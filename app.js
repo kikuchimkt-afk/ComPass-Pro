@@ -91,7 +91,7 @@
     // ===== THEME SELECTOR =====
     function renderThemeSelector() {
         const container = $('themeSelector');
-        const pastExams = THEMES.filter(t => t.exam !== '類題' && t.exam !== 'オリジナル');
+        const pastExams = THEMES.filter(t => t.exam !== '類題' && t.exam !== 'オリジナル').sort((a, b) => a.exam.localeCompare(b.exam));
         const practiceExams = THEMES.filter(t => t.exam === '類題' || t.exam === 'オリジナル');
 
         const renderOptions = (themes) => themes.map(t =>
@@ -164,6 +164,19 @@ ${getPrintStyles(minWords, maxWords)}
         <span class="header-meta">${theme.title}${theme.exam !== 'オリジナル' ? '（' + theme.exam + '）' : ''}</span>
     </div>
 
+    ${isOpinion ? `
+    <div class="instructions">
+        <p>Read the question below and write your opinion in English.</p>
+        <p>Your answer should include two reasons to support your opinion.</p>
+        <p>Suggested length: ${minWords}–${maxWords} words</p>
+        <p>Write your answer in the space provided on the answer sheet. <span class="underline">Any writing outside the space will not be graded.</span></p>
+    </div>
+
+    <div class="passage-label">Question</div>
+    <div class="passage" style="font-size:12pt; line-height:2; padding: 14px 18px; border: 2px solid #000; text-indent: 0;">
+        <p style="text-indent:0; font-weight: bold;">${theme.question}</p>
+    </div>
+    ` : `
     <div class="instructions">
         <p>Read the article below and summarize it in your own words as far as possible in English.</p>
         <p>Suggested length: ${minWords}–${maxWords} words</p>
@@ -176,6 +189,7 @@ ${getPrintStyles(minWords, maxWords)}
         <p>${theme.passage.merit}</p>
         <p>${theme.passage.demerit}</p>
     </div>
+    `}
 
     <div class="footer">© ECCベストワン藍住：北島中央</div>
 </div>
@@ -191,7 +205,7 @@ ${getPrintStyles(minWords, maxWords)}
         Name: <span class="name-field"></span>
     </div>
 
-    <div class="answer-subtitle">Summary（目安: ${minWords}〜${maxWords}語）</div>
+    <div class="answer-subtitle">${isOpinion ? 'Opinion' : 'Summary'}（目安: ${minWords}〜${maxWords}語）</div>
 
     <div class="answer-grid">
         ${answerRows.join('\n        ')}
@@ -948,6 +962,17 @@ ${getPrintStyles(minWords, maxWords)}
                 });
             }
 
+            // ファイル選択ボタン（captureなし）
+            const fileBtn = $(prefix + 'FileBtn');
+            const filePickInput = $(prefix + 'FileInput');
+            if (fileBtn && filePickInput) {
+                fileBtn.addEventListener('click', () => filePickInput.click());
+                filePickInput.addEventListener('change', (e) => {
+                    const file = e.target.files[0];
+                    if (file) handleImageFile(file, prefix);
+                });
+            }
+
             if (pasteBtn) {
                 pasteBtn.addEventListener('click', async () => {
                     try {
@@ -990,28 +1015,31 @@ ${getPrintStyles(minWords, maxWords)}
     function handleImageFile(file, prefix) {
         const preview = $(prefix + 'ImagePreview');
         resizeImage(file, 1200, (base64, mimeType) => {
-            // プレビュー表示
-            preview.style.display = '';
-            preview.innerHTML = `
-                <div class="image-preview-card fade-in">
-                    <img src="data:${mimeType};base64,${base64}" alt="入力画像">
-                    <div class="image-preview-actions">
-                        <button class="btn btn-success" id="${prefix}ImageGrade">
-                            <span class="material-symbols-rounded">auto_awesome</span> この画像でAI採点
-                        </button>
-                        <button class="btn btn-secondary" id="${prefix}ImageClear">
-                            <span class="material-symbols-rounded">close</span> 取り消し
-                        </button>
+            // トリミング・回転モーダルを表示
+            showCropModal(base64, mimeType, (croppedBase64, croppedMime) => {
+                // プレビュー表示
+                preview.style.display = '';
+                preview.innerHTML = `
+                    <div class="image-preview-card fade-in">
+                        <img src="data:${croppedMime};base64,${croppedBase64}" alt="入力画像">
+                        <div class="image-preview-actions">
+                            <button class="btn btn-success" id="${prefix}ImageGrade">
+                                <span class="material-symbols-rounded">auto_awesome</span> この画像でAI採点
+                            </button>
+                            <button class="btn btn-secondary" id="${prefix}ImageClear">
+                                <span class="material-symbols-rounded">close</span> 取り消し
+                            </button>
+                        </div>
                     </div>
-                </div>
-            `;
+                `;
 
-            $(prefix + 'ImageGrade').addEventListener('click', () => {
-                gradeWriting(prefix, base64, mimeType);
-            });
-            $(prefix + 'ImageClear').addEventListener('click', () => {
-                preview.style.display = 'none';
-                preview.innerHTML = '';
+                $(prefix + 'ImageGrade').addEventListener('click', () => {
+                    gradeWriting(prefix, croppedBase64, croppedMime);
+                });
+                $(prefix + 'ImageClear').addEventListener('click', () => {
+                    preview.style.display = 'none';
+                    preview.innerHTML = '';
+                });
             });
         });
     }
@@ -1038,6 +1066,308 @@ ${getPrintStyles(minWords, maxWords)}
             img.src = e.target.result;
         };
         reader.readAsDataURL(file);
+    }
+
+    // ===== CROP & ROTATE MODAL =====
+    function showCropModal(base64, mimeType, onConfirm) {
+        let rotation = 0; // 0, 90, 180, 270
+        let cropStart = null;
+        let cropEnd = null;
+        let isDragging = false;
+        let sourceImg = null;
+        let displayCanvas = null;
+        let displayCtx = null;
+        // Canvas上の画像の描画位置・サイズ
+        let imgDrawX = 0, imgDrawY = 0, imgDrawW = 0, imgDrawH = 0;
+
+        // モーダル DOM を構築
+        const modal = document.createElement('div');
+        modal.className = 'crop-modal';
+        modal.innerHTML = `
+            <div class="crop-header">
+                <div class="crop-header-title">
+                    <span class="material-symbols-rounded">crop</span>
+                    トリミング・回転
+                </div>
+                <div class="crop-header-hint">ドラッグで範囲選択</div>
+            </div>
+            <div class="crop-canvas-wrap" id="cropCanvasWrap">
+                <canvas id="cropCanvas"></canvas>
+            </div>
+            <div class="crop-toolbar">
+                <button class="crop-tb-btn cancel" id="cropCancel">
+                    <span class="material-symbols-rounded">close</span>
+                    取消
+                </button>
+                <div class="crop-tb-sep"></div>
+                <button class="crop-tb-btn rotate" id="cropRotateLeft">
+                    <span class="material-symbols-rounded">rotate_left</span>
+                </button>
+                <button class="crop-tb-btn rotate" id="cropRotateRight">
+                    <span class="material-symbols-rounded">rotate_right</span>
+                </button>
+                <div class="crop-tb-sep"></div>
+                <button class="crop-tb-btn confirm" id="cropConfirm">
+                    <span class="material-symbols-rounded">check</span>
+                    確定
+                </button>
+            </div>
+        `;
+        document.body.appendChild(modal);
+
+        displayCanvas = modal.querySelector('#cropCanvas');
+        displayCtx = displayCanvas.getContext('2d');
+        const wrap = modal.querySelector('#cropCanvasWrap');
+
+        // 画像をロード
+        sourceImg = new Image();
+        sourceImg.onload = () => {
+            drawAll();
+        };
+        sourceImg.src = `data:${mimeType};base64,${base64}`;
+
+        function getRotatedSize() {
+            const w = sourceImg.width;
+            const h = sourceImg.height;
+            if (rotation === 90 || rotation === 270) return { w: h, h: w };
+            return { w, h };
+        }
+
+        function drawAll() {
+            if (!sourceImg || !sourceImg.complete) return;
+            const container = wrap;
+            const cw = container.clientWidth;
+            const ch = container.clientHeight;
+
+            const rotSize = getRotatedSize();
+            // 画像をコンテナにフィットさせるスケール
+            const scale = Math.min(cw / rotSize.w, ch / rotSize.h, 1);
+            imgDrawW = Math.round(rotSize.w * scale);
+            imgDrawH = Math.round(rotSize.h * scale);
+            imgDrawX = Math.round((cw - imgDrawW) / 2);
+            imgDrawY = Math.round((ch - imgDrawH) / 2);
+
+            displayCanvas.width = cw;
+            displayCanvas.height = ch;
+
+            displayCtx.clearRect(0, 0, cw, ch);
+
+            // 回転して描画
+            displayCtx.save();
+            displayCtx.translate(imgDrawX + imgDrawW / 2, imgDrawY + imgDrawH / 2);
+            displayCtx.rotate(rotation * Math.PI / 180);
+            if (rotation === 90 || rotation === 270) {
+                displayCtx.drawImage(sourceImg, -imgDrawH / 2, -imgDrawW / 2, imgDrawH, imgDrawW);
+            } else {
+                displayCtx.drawImage(sourceImg, -imgDrawW / 2, -imgDrawH / 2, imgDrawW, imgDrawH);
+            }
+            displayCtx.restore();
+
+            // クロップ矩形描画
+            if (cropStart && cropEnd) {
+                const x = Math.min(cropStart.x, cropEnd.x);
+                const y = Math.min(cropStart.y, cropEnd.y);
+                const w = Math.abs(cropEnd.x - cropStart.x);
+                const h = Math.abs(cropEnd.y - cropStart.y);
+
+                if (w > 3 && h > 3) {
+                    // 暗い領域（選択外）
+                    displayCtx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+                    // 上
+                    displayCtx.fillRect(0, 0, cw, y);
+                    // 下
+                    displayCtx.fillRect(0, y + h, cw, ch - y - h);
+                    // 左
+                    displayCtx.fillRect(0, y, x, h);
+                    // 右
+                    displayCtx.fillRect(x + w, y, cw - x - w, h);
+
+                    // 選択枠
+                    displayCtx.strokeStyle = '#fff';
+                    displayCtx.lineWidth = 2;
+                    displayCtx.strokeRect(x, y, w, h);
+
+                    // コーナーマーク
+                    const cLen = 16;
+                    displayCtx.strokeStyle = 'rgba(108, 99, 255, 1)';
+                    displayCtx.lineWidth = 3;
+                    // 左上
+                    displayCtx.beginPath();
+                    displayCtx.moveTo(x, y + cLen); displayCtx.lineTo(x, y); displayCtx.lineTo(x + cLen, y);
+                    displayCtx.stroke();
+                    // 右上
+                    displayCtx.beginPath();
+                    displayCtx.moveTo(x + w - cLen, y); displayCtx.lineTo(x + w, y); displayCtx.lineTo(x + w, y + cLen);
+                    displayCtx.stroke();
+                    // 左下
+                    displayCtx.beginPath();
+                    displayCtx.moveTo(x, y + h - cLen); displayCtx.lineTo(x, y + h); displayCtx.lineTo(x + cLen, y + h);
+                    displayCtx.stroke();
+                    // 右下
+                    displayCtx.beginPath();
+                    displayCtx.moveTo(x + w - cLen, y + h); displayCtx.lineTo(x + w, y + h); displayCtx.lineTo(x + w, y + h - cLen);
+                    displayCtx.stroke();
+                }
+            }
+        }
+
+        // イベント座標を取得（タッチ/マウス共通）
+        function getPointerPos(e) {
+            const rect = displayCanvas.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            return {
+                x: clientX - rect.left,
+                y: clientY - rect.top
+            };
+        }
+
+        function onPointerDown(e) {
+            e.preventDefault();
+            isDragging = true;
+            const pos = getPointerPos(e);
+            cropStart = pos;
+            cropEnd = pos;
+        }
+
+        function onPointerMove(e) {
+            if (!isDragging) return;
+            e.preventDefault();
+            cropEnd = getPointerPos(e);
+            drawAll();
+        }
+
+        function onPointerUp(e) {
+            if (!isDragging) return;
+            isDragging = false;
+            if (e.changedTouches) {
+                const rect = displayCanvas.getBoundingClientRect();
+                cropEnd = {
+                    x: e.changedTouches[0].clientX - rect.left,
+                    y: e.changedTouches[0].clientY - rect.top
+                };
+            }
+            drawAll();
+        }
+
+        displayCanvas.addEventListener('mousedown', onPointerDown);
+        displayCanvas.addEventListener('mousemove', onPointerMove);
+        displayCanvas.addEventListener('mouseup', onPointerUp);
+        displayCanvas.addEventListener('touchstart', onPointerDown, { passive: false });
+        displayCanvas.addEventListener('touchmove', onPointerMove, { passive: false });
+        displayCanvas.addEventListener('touchend', onPointerUp);
+
+        // 回転
+        modal.querySelector('#cropRotateLeft').addEventListener('click', () => {
+            rotation = (rotation + 270) % 360;
+            cropStart = null;
+            cropEnd = null;
+            drawAll();
+        });
+
+        modal.querySelector('#cropRotateRight').addEventListener('click', () => {
+            rotation = (rotation + 90) % 360;
+            cropStart = null;
+            cropEnd = null;
+            drawAll();
+        });
+
+        // 取消
+        modal.querySelector('#cropCancel').addEventListener('click', () => {
+            modal.remove();
+        });
+
+        // 確定
+        modal.querySelector('#cropConfirm').addEventListener('click', () => {
+            const rotSize = getRotatedSize();
+            // 実際のスケール比率
+            const scaleX = rotSize.w / imgDrawW;
+            const scaleY = rotSize.h / imgDrawH;
+
+            // 出力用Canvas
+            const outCanvas = document.createElement('canvas');
+            const outCtx = outCanvas.getContext('2d');
+
+            if (cropStart && cropEnd) {
+                const cx = Math.min(cropStart.x, cropEnd.x);
+                const cy = Math.min(cropStart.y, cropEnd.y);
+                const cw = Math.abs(cropEnd.x - cropStart.x);
+                const ch = Math.abs(cropEnd.y - cropStart.y);
+
+                if (cw > 3 && ch > 3) {
+                    // 選択範囲を画像座標に変換
+                    const srcX = (cx - imgDrawX) * scaleX;
+                    const srcY = (cy - imgDrawY) * scaleY;
+                    const srcW = cw * scaleX;
+                    const srcH = ch * scaleY;
+
+                    outCanvas.width = Math.round(srcW);
+                    outCanvas.height = Math.round(srcH);
+
+                    // 回転済み画像をまず中間Canvasに描画
+                    const tempCanvas = document.createElement('canvas');
+                    tempCanvas.width = rotSize.w;
+                    tempCanvas.height = rotSize.h;
+                    const tempCtx = tempCanvas.getContext('2d');
+                    tempCtx.translate(rotSize.w / 2, rotSize.h / 2);
+                    tempCtx.rotate(rotation * Math.PI / 180);
+                    if (rotation === 90 || rotation === 270) {
+                        tempCtx.drawImage(sourceImg, -sourceImg.width / 2, -sourceImg.height / 2);
+                    } else {
+                        tempCtx.drawImage(sourceImg, -sourceImg.width / 2, -sourceImg.height / 2);
+                    }
+
+                    // 中間Canvasからクロップ範囲を切り出し
+                    outCtx.drawImage(tempCanvas, srcX, srcY, srcW, srcH, 0, 0, outCanvas.width, outCanvas.height);
+
+                    const dataUrl = outCanvas.toDataURL('image/jpeg', 0.85);
+                    const outBase64 = dataUrl.split(',')[1];
+                    modal.remove();
+                    onConfirm(outBase64, 'image/jpeg');
+                    return;
+                }
+            }
+
+            // クロップ範囲なし → 回転のみ適用
+            if (rotation === 0) {
+                // 何も変更なし
+                modal.remove();
+                onConfirm(base64, mimeType);
+                return;
+            }
+
+            // 回転のみ
+            outCanvas.width = rotSize.w;
+            outCanvas.height = rotSize.h;
+            outCtx.translate(rotSize.w / 2, rotSize.h / 2);
+            outCtx.rotate(rotation * Math.PI / 180);
+            if (rotation === 90 || rotation === 270) {
+                outCtx.drawImage(sourceImg, -sourceImg.width / 2, -sourceImg.height / 2);
+            } else {
+                outCtx.drawImage(sourceImg, -sourceImg.width / 2, -sourceImg.height / 2);
+            }
+
+            const dataUrl = outCanvas.toDataURL('image/jpeg', 0.85);
+            const outBase64 = dataUrl.split(',')[1];
+            modal.remove();
+            onConfirm(outBase64, 'image/jpeg');
+        });
+
+        // ウィンドウリサイズ時再描画
+        function onResize() {
+            if (!modal.parentNode) return;
+            drawAll();
+        }
+        window.addEventListener('resize', onResize);
+
+        // クリーンアップ
+        const observer = new MutationObserver(() => {
+            if (!modal.parentNode) {
+                window.removeEventListener('resize', onResize);
+                observer.disconnect();
+            }
+        });
+        observer.observe(document.body, { childList: true });
     }
 
     // ===== AI GRADING =====

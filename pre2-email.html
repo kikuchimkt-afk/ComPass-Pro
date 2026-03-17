@@ -348,12 +348,17 @@
                     </div>
                     <div class="btn-group image-input-group">
                         <button class="btn btn-outline" id="step2CameraBtn">
-                            <span class="material-symbols-rounded">photo_camera</span> 写真で入力
+                            <span class="material-symbols-rounded">photo_camera</span> 撮影
+                        </button>
+                        <button class="btn btn-outline" id="step2FileBtn">
+                            <span class="material-symbols-rounded">image</span> ファイル
                         </button>
                         <button class="btn btn-outline" id="step2PasteBtn">
                             <span class="material-symbols-rounded">content_paste</span> 貼り付け
                         </button>
                         <input type="file" accept="image/*" capture="environment" id="step2CameraInput"
+                            style="display:none">
+                        <input type="file" accept="image/*" id="step2FileInput"
                             style="display:none">
                     </div>
                     <div id="step2ImagePreview" style="display:none"></div>
@@ -459,12 +464,17 @@
                     </div>
                     <div class="btn-group image-input-group">
                         <button class="btn btn-outline" id="step3CameraBtn">
-                            <span class="material-symbols-rounded">photo_camera</span> 写真で入力
+                            <span class="material-symbols-rounded">photo_camera</span> 撮影
+                        </button>
+                        <button class="btn btn-outline" id="step3FileBtn">
+                            <span class="material-symbols-rounded">image</span> ファイル
                         </button>
                         <button class="btn btn-outline" id="step3PasteBtn">
                             <span class="material-symbols-rounded">content_paste</span> 貼り付け
                         </button>
                         <input type="file" accept="image/*" capture="environment" id="step3CameraInput"
+                            style="display:none">
+                        <input type="file" accept="image/*" id="step3FileInput"
                             style="display:none">
                     </div>
                     <div id="step3ImagePreview" style="display:none"></div>

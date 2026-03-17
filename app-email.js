@@ -90,10 +90,13 @@
         container.innerHTML = `
             <div class="theme-select-row">
                 <select class="theme-select" id="themeSelect">
-                    ${EMAIL_THEMES.map(t =>
+                    ${[...EMAIL_THEMES].sort((a, b) => a.exam.localeCompare(b.exam)).map(t =>
                         `<option value="${t.id}" ${t.id === currentThemeId ? 'selected' : ''}>${t.title}　${t.exam}</option>`
                     ).join('')}
                 </select>
+                <button class="print-btn" id="printBtn" title="問題用紙を印刷">
+                    <span class="material-symbols-rounded">print</span>
+                </button>
                 <button class="print-btn" id="jaToggle" title="日本語訳表示">
                     <span class="material-symbols-rounded">translate</span>
                 </button>
@@ -104,10 +107,159 @@
             resetSelections();
             renderCurrentStep();
         });
+        $('printBtn').addEventListener('click', () => printWorksheet());
         // Re-init JA toggle
         initJaToggle();
     }
 
+    // ===== PRINT WORKSHEET =====
+    function printWorksheet() {
+        const theme = getTheme();
+        const gradeLabel = WRITEPASS_CONFIG.gradeLabel || '準2級';
+        const taskLabel = WRITEPASS_CONFIG.taskLabel || 'Eメール';
+        const minWords = WP_MIN_WORDS;
+        const maxWords = WP_MAX_WORDS;
+        const wordsPerRow = 10;
+        const totalRows = Math.ceil(maxWords * 1.3 / wordsPerRow);
+
+        const answerRows = [];
+        for (let row = 0; row < totalRows; row++) {
+            const rowNum = (row + 1) * wordsPerRow;
+            const cells = [];
+            for (let col = 1; col <= wordsPerRow; col++) {
+                const isBold = col === 5 || col === 10;
+                cells.push(`<span class="word-cell${isBold ? ' bold' : ''}"></span>`);
+            }
+            answerRows.push(`<div class="word-row">${cells.join('')}<span class="row-count">${rowNum}</span></div>`);
+        }
+
+        // 下線語句を太字にする
+        const emailText = theme.alexEmail.replace(
+            new RegExp(theme.underlinedTopic.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'),
+            match => `<strong class="underline">${match}</strong>`
+        );
+
+        const printHtml = `<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>${gradeLabel} ${taskLabel} — ${theme.title}</title>
+<style>
+@page { size: A4; margin: 18mm 15mm 15mm 15mm; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Times New Roman', 'Noto Serif JP', serif; font-size: 11pt; line-height: 1.6; color: #000; }
+
+.page { page-break-after: always; min-height: 247mm; position: relative; }
+.page:last-child { page-break-after: auto; }
+
+.header { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 2px solid #000; padding-bottom: 6px; margin-bottom: 12px; }
+.header-title { font-size: 14pt; font-weight: bold; }
+.header-meta { font-size: 9pt; color: #444; }
+
+.instructions { margin-bottom: 14px; padding: 10px 14px; border: 1px solid #000; background: #f9f9f9; }
+.instructions p { margin-bottom: 4px; font-size: 10pt; }
+.instructions p::before { content: "● "; font-weight: bold; }
+.instructions .underline { text-decoration: underline; }
+
+.passage-label { font-size: 10pt; font-weight: bold; margin-bottom: 6px; border-left: 4px solid #000; padding-left: 8px; }
+.email-box { font-size: 10.5pt; line-height: 1.8; border: 2px solid #000; padding: 14px 18px; margin-bottom: 12px; }
+.email-box .underline { text-decoration: underline; font-weight: bold; }
+.email-from { font-size: 9pt; color: #666; margin-bottom: 8px; font-style: italic; }
+.opinion-q { margin-top: 12px; padding-top: 10px; border-top: 1px dashed #999; font-weight: bold; }
+
+.footer { position: absolute; bottom: 0; left: 0; right: 0; text-align: center; font-size: 8pt; color: #888; }
+
+/* ===== ANSWER SHEET ===== */
+.name-row { display: flex; justify-content: center; margin-bottom: 10px; font-size: 11pt; font-weight: bold; }
+.name-field { border-bottom: 1px solid #000; width: 200px; margin-left: 8px; }
+.answer-subtitle { font-size: 10pt; text-align: center; color: #333; margin-bottom: 12px; }
+
+.answer-grid { padding: 4px 0; }
+.word-row { display: flex; align-items: flex-end; margin-bottom: 20px; }
+.word-cell { flex: 1; height: 0; border-bottom: 1px solid #999; margin: 0 2px; }
+.word-cell.bold { border-bottom: 2.5px solid #000; }
+.row-count { width: 30px; text-align: right; font-size: 9pt; font-weight: bold; color: #333; padding-left: 6px; flex-shrink: 0; }
+
+.word-count-guide { margin-top: 10px; font-size: 9pt; color: #555; text-align: right; }
+.target-range { display: inline-block; padding: 4px 12px; border: 2px solid #000; font-size: 10pt; font-weight: bold; }
+
+.reply-template { margin-top: 10px; font-size: 10pt; line-height: 1.6; color: #666; }
+.reply-template span { color: #000; font-weight: bold; }
+
+@media print {
+    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
+</style>
+</head>
+<body>
+
+<!-- ===== PAGE 1: 問題 ===== -->
+<div class="page">
+    <div class="header">
+        <span class="header-title">英検${gradeLabel} ${taskLabel}</span>
+        <span class="header-meta">${theme.title}（${theme.exam}）</span>
+    </div>
+
+    <div class="instructions">
+        <p>Read the e-mail below from Alex, your friend in another country.</p>
+        <p>Write a reply to Alex's e-mail.</p>
+        <p>Include two of the following: a question, your opinion and a reason for your opinion.</p>
+        <p>Suggested length: ${minWords}–${maxWords} words</p>
+        <p>Write your reply in the space provided on the answer sheet. <span class="underline">Any writing outside the space will not be graded.</span></p>
+    </div>
+
+    <div class="passage-label">E-mail from Alex</div>
+    <div class="email-box">
+        <div class="email-from">From: Alex</div>
+        ${emailText}
+    </div>
+
+    <div class="footer">© ECCベストワン藍住：北島中央</div>
+</div>
+
+<!-- ===== PAGE 2: 解答用紙 ===== -->
+<div class="page">
+    <div class="header">
+        <span class="header-title">Answer Sheet — 解答用紙</span>
+        <span class="header-meta">英検${gradeLabel} ${taskLabel}</span>
+    </div>
+
+    <div class="name-row">
+        Name: <span class="name-field"></span>
+    </div>
+
+    <div class="reply-template">
+        <span>Hi, Alex!</span><br>
+        Thank you for your e-mail.
+    </div>
+
+    <div class="answer-subtitle" style="margin-top: 12px;">E-mail Reply（目安: ${minWords}〜${maxWords}語）</div>
+
+    <div class="answer-grid">
+        ${answerRows.join('\n        ')}
+    </div>
+
+    <div class="reply-template">
+        <span>Best wishes,</span>
+    </div>
+
+    <div class="word-count-guide">
+        <span class="target-range">目安語数: ${minWords}–${maxWords} words</span>
+    </div>
+
+    <div class="footer">© ECCベストワン藍住：北島中央</div>
+</div>
+
+</body>
+</html>`;
+
+        const printWin = window.open('', '_blank');
+        printWin.document.write(printHtml);
+        printWin.document.close();
+        printWin.onload = () => {
+            setTimeout(() => printWin.print(), 300);
+        };
+    }
     function resetSelections() {
         selectedOpinion = null;
         selectedReason = null;
