@@ -1,4 +1,4 @@
-/**
+﻿/**
  * ComPass Pro AI Grader — Google Apps Script
  * 
  * ===== セットアップ手順 =====
@@ -15,7 +15,7 @@
 
 // ===== 採点基準マスターデータ =====
 const SCORING_CONFIG = {
-    system_role: "あなたは英検（実用英語技能検定）のプロの採点官です。提供された受験者の解答を、2024年度からの新形式に基づき、極めて正確かつ公平に採点し、詳細なフィードバックを行ってください。",
+    system_role: "あなたは英語資格検定（実用英語技能検定）のプロの採点官です。提供された受験者の解答を、2024年度からの新形式に基づき、極めて正確かつ公平に採点し、詳細なフィードバックを行ってください。",
 
     standard_rubric: {
         content: "課題で求められている内容（意見、理由、要点など）が過不足なく含まれているか。論点がトピックから逸れていないか。",
@@ -481,7 +481,7 @@ function buildPrompt(passage, modelAnswer, studentAnswer, passageJa, gradeId, ta
     // --- プロンプト組み立て ---
     return `${SCORING_CONFIG.system_role}
 
-## 英検${gradeLabel} ${taskLabel} 採点基準
+## 英語資格検定${gradeLabel} ${taskLabel} 採点基準
 
 目安語数: ${wordRange}語 ｜ 各観点 0〜${maxPts}点 ｜ 合計${totalMax}点満点
 

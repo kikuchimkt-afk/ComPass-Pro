@@ -1,4 +1,4 @@
-// ComPass Pro — Eメール問題 専用ロジック
+﻿// ComPass Pro — Eメール問題 専用ロジック
 (function () {
     'use strict';
 
@@ -196,7 +196,7 @@ body { font-family: 'Times New Roman', 'Noto Serif JP', serif; font-size: 11pt; 
 <!-- ===== PAGE 1: 問題 ===== -->
 <div class="page">
     <div class="header">
-        <span class="header-title">英検${gradeLabel} ${taskLabel}</span>
+        <span class="header-title">英語資格検定${gradeLabel} ${taskLabel}</span>
         <span class="header-meta">${theme.title}（${theme.exam}）</span>
     </div>
 
@@ -221,7 +221,7 @@ body { font-family: 'Times New Roman', 'Noto Serif JP', serif; font-size: 11pt; 
 <div class="page">
     <div class="header">
         <span class="header-title">Answer Sheet — 解答用紙</span>
-        <span class="header-meta">英検${gradeLabel} ${taskLabel}</span>
+        <span class="header-meta">英語資格検定${gradeLabel} ${taskLabel}</span>
     </div>
 
     <div class="name-row">
