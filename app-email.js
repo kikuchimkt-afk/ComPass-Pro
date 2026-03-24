@@ -1,4 +1,4 @@
-﻿// ComPass Pro — Eメール問題 専用ロジック
+// ComPass Pro — Eメール問題 専用ロジック
 (function () {
     'use strict';
 
@@ -139,11 +139,16 @@
             match => `<strong class="underline">${match}</strong>`
         );
 
+        // QR code URL
+        const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+        const qrUrl = `https://com-pass-pro.vercel.app/${currentPage}?theme=${currentThemeId}`;
+
         const printHtml = `<!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
 <title>${gradeLabel} ${taskLabel} — ${theme.title}</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script>
 <style>
 @page { size: A4; margin: 18mm 15mm 15mm 15mm; }
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -166,6 +171,12 @@ body { font-family: 'Times New Roman', 'Noto Serif JP', serif; font-size: 11pt; 
 .email-box .underline { text-decoration: underline; font-weight: bold; }
 .email-from { font-size: 9pt; color: #666; margin-bottom: 8px; font-style: italic; }
 .opinion-q { margin-top: 12px; padding-top: 10px; border-top: 1px dashed #999; font-weight: bold; }
+
+/* QR code */
+.qr-section { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; padding: 8px 12px; border: 1px solid #ccc; background: #fafafa; }
+.qr-container { flex-shrink: 0; width: 80px; height: 80px; }
+.qr-container canvas, .qr-container img { width: 80px !important; height: 80px !important; }
+.qr-text { font-size: 9pt; line-height: 1.5; color: #333; }
 
 .footer { position: absolute; bottom: 0; left: 0; right: 0; text-align: center; font-size: 8pt; color: #888; }
 
@@ -198,6 +209,11 @@ body { font-family: 'Times New Roman', 'Noto Serif JP', serif; font-size: 11pt; 
     <div class="header">
         <span class="header-title">英語資格検定${gradeLabel} ${taskLabel}</span>
         <span class="header-meta">${theme.title}（${theme.exam}）</span>
+    </div>
+
+    <div class="qr-section">
+        <div class="qr-container" id="qrCode" data-url="${qrUrl}"></div>
+        <div class="qr-text">📱 QRコードをスマホ・タブレットで読み取って学習しましょう<br><strong>ComPass Pro</strong> でStep 1〜3の練習ができます</div>
     </div>
 
     <div class="instructions">
@@ -257,7 +273,23 @@ body { font-family: 'Times New Roman', 'Noto Serif JP', serif; font-size: 11pt; 
         printWin.document.write(printHtml);
         printWin.document.close();
         printWin.onload = () => {
-            setTimeout(() => printWin.print(), 300);
+            // Generate QR codes if qrcodejs is loaded
+            try {
+                const qrContainers = printWin.document.querySelectorAll('.qr-container[data-url]');
+                qrContainers.forEach(container => {
+                    new printWin.QRCode(container, {
+                        text: container.dataset.url,
+                        width: 80,
+                        height: 80,
+                        colorDark: '#1a1a1a',
+                        colorLight: '#ffffff',
+                        correctLevel: printWin.QRCode.CorrectLevel.M
+                    });
+                });
+            } catch (e) {
+                console.error('QR generation error:', e);
+            }
+            setTimeout(() => printWin.print(), 500);
         };
     }
     function resetSelections() {
@@ -1247,6 +1279,16 @@ body { font-family: 'Times New Roman', 'Noto Serif JP', serif; font-size: 11pt; 
 
     // ===== INIT =====
     document.addEventListener('DOMContentLoaded', () => {
+        // URLパラメータからテーマを自動選択
+        const params = new URLSearchParams(window.location.search);
+        const themeParam = params.get('theme');
+        if (themeParam) {
+            const themeId = parseInt(themeParam);
+            if (EMAIL_THEMES.some(t => t.id === themeId)) {
+                currentThemeId = themeId;
+            }
+        }
+
         initThemeToggle();
         initJaToggle();
         initStepNav();

@@ -1,4 +1,4 @@
-﻿// ComPass Pro — App Logic
+// ComPass Pro — App Logic
 (function () {
     'use strict';
 
@@ -146,11 +146,16 @@
             answerRows.push(`<div class="word-row">${cells.join('')}<span class="row-count">${rowNum}</span></div>`);
         }
 
+        // QR code URL
+        const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+        const qrUrl = `https://com-pass-pro.vercel.app/${currentPage}?theme=${currentThemeId}`;
+
         const printHtml = `<!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
 <title>${gradeLabel} ${taskLabel} — ${theme.title}</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script>
 <style>
 ${getPrintStyles(minWords, maxWords)}
 </style>
@@ -162,6 +167,11 @@ ${getPrintStyles(minWords, maxWords)}
     <div class="header">
         <span class="header-title">英語資格検定${gradeLabel} ${taskLabel}</span>
         <span class="header-meta">${theme.title}${theme.exam !== 'オリジナル' ? '（' + theme.exam + '）' : ''}</span>
+    </div>
+
+    <div class="qr-section">
+        <div class="qr-container" id="qrCode" data-url="${qrUrl}"></div>
+        <div class="qr-text">📱 QRコードをスマホ・タブレットで読み取って学習しましょう<br><strong>ComPass Pro</strong> でStep 1〜3の練習ができます</div>
     </div>
 
     ${isOpinion ? `
@@ -245,6 +255,12 @@ body { font-family: 'Times New Roman', 'Noto Serif JP', serif; font-size: 11pt; 
 
 .passage-label { font-size: 10pt; font-weight: bold; margin-bottom: 6px; border-left: 4px solid #000; padding-left: 8px; }
 .passage { font-size: 10.5pt; line-height: 1.75; text-align: justify; }
+
+/* QR code */
+.qr-section { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; padding: 8px 12px; border: 1px solid #ccc; background: #fafafa; }
+.qr-container { flex-shrink: 0; width: 80px; height: 80px; }
+.qr-container canvas, .qr-container img { width: 80px !important; height: 80px !important; }
+.qr-text { font-size: 9pt; line-height: 1.5; color: #333; }
 .passage p { text-indent: 1.5em; margin-bottom: 8px; }
 
 .footer { position: absolute; bottom: 0; left: 0; right: 0; text-align: center; font-size: 8pt; color: #888; }
@@ -311,7 +327,23 @@ body { font-family: 'Times New Roman', 'Noto Serif JP', serif; font-size: 11pt; 
         printWin.document.write(html);
         printWin.document.close();
         printWin.onload = () => {
-            setTimeout(() => printWin.print(), 300);
+            // Generate QR codes if qrcodejs is loaded
+            try {
+                const qrContainers = printWin.document.querySelectorAll('.qr-container[data-url]');
+                qrContainers.forEach(container => {
+                    new printWin.QRCode(container, {
+                        text: container.dataset.url,
+                        width: 80,
+                        height: 80,
+                        colorDark: '#1a1a1a',
+                        colorLight: '#ffffff',
+                        correctLevel: printWin.QRCode.CorrectLevel.M
+                    });
+                });
+            } catch (e) {
+                console.error('QR generation error:', e);
+            }
+            setTimeout(() => printWin.print(), 500);
         };
     }
 
@@ -1746,6 +1778,16 @@ ${getPrintStyles(minWords, maxWords)}
 
     // ===== INIT =====
     function init() {
+        // URLパラメータからテーマを自動選択
+        const params = new URLSearchParams(window.location.search);
+        const themeParam = params.get('theme');
+        if (themeParam) {
+            const themeId = parseInt(themeParam);
+            if (THEMES.some(t => t.id === themeId)) {
+                currentThemeId = themeId;
+            }
+        }
+
         initThemeToggle();
         initStepNav();
         renderThemeSelector();
