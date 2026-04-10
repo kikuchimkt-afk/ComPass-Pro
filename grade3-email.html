@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="ja" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ComPass Pro — 英語資格検定準2級 Eメール返信マスター</title>
+    <meta name="description" content="英語資格検定準2級のEメール返信問題を3ステップでマスターする学習アプリ。過去問対応。">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+JP:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Eメール専用スタイル */
+        .email-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .email-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 16px;
+            background: rgba(var(--accent-rgb), 0.08);
+            border-bottom: 1px solid var(--border);
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .email-body {
+            padding: 16px;
+            font-size: 0.92rem;
+            line-height: 1.8;
+            color: var(--text);
+        }
+
+        .email-underline {
+            text-decoration: underline;
+            text-decoration-color: #ef4444;
+            text-underline-offset: 3px;
+            font-weight: 700;
+            color: #ef4444;
+        }
+
+        /* テンプレートステップ */
+        .template-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .template-step {
+            padding: 10px 14px;
+            border-left: 4px solid;
+            border-radius: 0 8px 8px 0;
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .template-step-label {
+            font-size: 0.72rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .template-step-text {
+            font-size: 0.92rem;
+            line-height: 1.6;
+        }
+
+        .template-blank {
+            display: inline-block;
+            padding: 2px 8px;
+            background: rgba(var(--accent-rgb), 0.1);
+            border: 1px dashed var(--border);
+            border-radius: 4px;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        /* パーツビルダー */
+        .builder-section {
+            margin-bottom: 20px;
+        }
+
+        .builder-label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.88rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .builder-label .material-symbols-rounded {
+            font-size: 18px;
+        }
+
+        .builder-options {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .part-option {
+            display: block;
+            width: 100%;
+            text-align: left;
+            padding: 10px 14px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--text);
+        }
+
+        .part-option:hover {
+            border-color: var(--accent);
+            background: rgba(var(--accent-rgb), 0.05);
+        }
+
+        .part-option.selected {
+            border-color: var(--accent);
+            background: rgba(var(--accent-rgb), 0.1);
+            box-shadow: 0 0 0 2px rgba(var(--accent-rgb), 0.2);
+        }
+
+        .part-option.selected.q1 {
+            border-color: #ef4444;
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .part-option.selected.q2 {
+            border-color: #f59e0b;
+            background: rgba(245, 158, 11, 0.1);
+        }
+
+        .part-option-ja {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .part-option-en {
+            font-size: 0.88rem;
+            line-height: 1.5;
+        }
+
+        .part-option-ja-text {
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        /* プレビュー */
+        .email-preview-content {
+            font-size: 0.92rem;
+            line-height: 2;
+            padding: 16px;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        .preview-fixed {
+            color: var(--text-secondary);
+        }
+
+        .preview-opinion {
+            color: #3b82f6;
+            font-weight: 600;
+        }
+
+        .preview-reason {
+            color: #f59e0b;
+            font-weight: 600;
+        }
+
+        .preview-question {
+            color: #ef4444;
+            font-weight: 600;
+        }
+
+        .preview-blank {
+            color: var(--text-secondary);
+            opacity: 0.5;
+            font-style: italic;
+        }
+
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-inner">
+                <a href="index.html" class="app-title" style="text-decoration:none;color:inherit">
+                    <span class="material-symbols-rounded">edit_note</span>
+                    ComPass Pro
+                    <span style="font-size:0.65rem;opacity:0.6;font-weight:500;margin-left:4px">準2級 Eメール</span>
+                </a>
+                <div class="header-right">
+                    <button class="theme-toggle" id="themeToggle" title="テーマ切替">
+                        <span class="material-symbols-rounded">light_mode</span>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Step Navigation -->
+        <nav class="step-nav" id="stepNav">
+            <button class="step-btn active" data-step="1">
+                <span class="material-symbols-rounded">school</span>
+                <span class="step-label">
+                    <span class="step-num">1</span>
+                    型を知る
+                </span>
+            </button>
+            <button class="step-btn" data-step="2">
+                <span class="material-symbols-rounded">swap_horiz</span>
+                <span class="step-label">
+                    <span class="step-num">2</span>
+                    練習
+                </span>
+            </button>
+            <button class="step-btn" data-step="3">
+                <span class="material-symbols-rounded">timer</span>
+                <span class="step-label">
+                    <span class="step-num">3</span>
+                    本番力
+                </span>
+            </button>
+        </nav>
+
+        <!-- Theme Selector -->
+        <div class="theme-selector" id="themeSelector"></div>
+
+        <!-- STEP 1: テンプレート学習 -->
+        <div class="step-pane active" id="step1">
+            <div class="content-area">
+                <div class="section-header">
+                    <h2>📧 Step 1：テンプレートを学ぶ</h2>
+                    <p class="section-desc">Eメール返信は「挨拶→お礼→意見回答→質問2つ→結び」の5パートです。（40〜50語）</p>
+                </div>
+
+                <!-- Alexのメール -->
+                <div class="card">
+                    <div class="card-title">
+                        <span class="material-symbols-rounded">mail</span>
+                        Alexからのメール
+                    </div>
+                    <div id="emailDisplay"></div>
+                </div>
+
+                <!-- テンプレート -->
+                <div class="card">
+                    <div class="card-title">
+                        <span class="material-symbols-rounded">account_tree</span>
+                        返信テンプレート
+                    </div>
+                    <div id="templateGuide"></div>
+                </div>
+
+                <!-- パーツ組み立て -->
+                <div class="card">
+                    <div class="card-title">
+                        <span class="material-symbols-rounded">construction</span>
+                        パーツを選んで組み立てる
+                    </div>
+                    <div id="partBuilder"></div>
+                </div>
+
+                <!-- プレビュー -->
+                <div class="card">
+                    <div class="card-title">
+                        <span class="material-symbols-rounded">preview</span>
+                        組み立てプレビュー
+                    </div>
+                    <div id="emailPreview"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- STEP 2: 練習 -->
+        <div class="step-pane" id="step2">
+            <div class="content-area">
+                <div class="section-header">
+                    <h2>🔧 Step 2：チャンクで練習</h2>
+                    <p class="section-desc">英文の語順をチャンク並べ替えで練習し、その後自分で書いてみましょう。</p>
+                </div>
+
+                <!-- メール表示 -->
+                <div class="card">
+                    <div class="card-title">
+                        <span class="material-symbols-rounded">mail</span>
+                        Alexのメール
+                    </div>
+                    <div id="step2EmailDisplay"></div>
+                </div>
+
+                <!-- チャンク並べ替え -->
+                <div class="card">
+                    <div class="card-title">
+                        <span class="material-symbols-rounded">sort</span>
+                        チャンク並べ替え
+                    </div>
+                    <div class="progress-wrap">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="step2Progress"></div>
+                        </div>
+                        <span class="progress-text" id="step2ProgressText">1 / 3</span>
+                    </div>
+                    <div id="step2Chunks"></div>
+                </div>
+
+                <!-- 自由記述 -->
+                <div class="card">
+                    <div class="card-title">
+                        <span class="material-symbols-rounded">draw</span>
+                        自分で書いてみる
+                    </div>
+                    <textarea class="writing-area" id="step2Writing"
+                        placeholder="ここにEメール返信を書いてください（40〜50語）..."></textarea>
+                    <div class="word-counter" id="step2WordCounter">
+                        <span class="word-count-num under" id="step2WordNum">0</span>
+                        <span class="word-range">/ 40〜50語</span>
+                        <div class="word-bar">
+                            <div class="word-bar-fill under" id="step2WordBar"></div>
+                        </div>
+                    </div>
+                    <div class="btn-group" style="margin-top:12px">
+                        <button class="btn btn-primary" id="step2ShowModel">
+                            <span class="material-symbols-rounded">visibility</span> 模範解答を見る
+                        </button>
+                        <button class="btn btn-success ai-grade-btn" id="step2AiGrade">
+                            <span class="material-symbols-rounded">auto_awesome</span> AI採点
+                        </button>
+                    </div>
+                    <div class="btn-group image-input-group">
+                        <button class="btn btn-outline" id="step2CameraBtn">
+                            <span class="material-symbols-rounded">photo_camera</span> 撮影
+                        </button>
+                        <button class="btn btn-outline" id="step2FileBtn">
+                            <span class="material-symbols-rounded">image</span> ファイル
+                        </button>
+                        <button class="btn btn-outline" id="step2PasteBtn">
+                            <span class="material-symbols-rounded">content_paste</span> 貼り付け
+                        </button>
+                        <input type="file" accept="image/*" capture="environment" id="step2CameraInput"
+                            style="display:none">
+                        <input type="file" accept="image/*" id="step2FileInput"
+                            style="display:none">
+                    </div>
+                    <div id="step2ImagePreview" style="display:none"></div>
+                    <div id="step2ModelAnswer" style="display:none"></div>
+                    <div id="step2GradeResult" style="display:none"></div>
+
+                    <!-- 自己採点チェックリスト -->
+                    <div style="margin-top:16px">
+                        <div class="card-title">
+                            <span class="material-symbols-rounded">checklist</span>
+                            自己採点チェックリスト
+                        </div>
+                        <div class="checklist" id="step2Checklist">
+                            <div class="check-item" data-check="1">
+                                <div class="check-box"><span class="material-symbols-rounded"
+                                        style="font-size:14px;display:none">check</span></div>
+                                Hi, Alex! で挨拶しているか？
+                            </div>
+                            <div class="check-item" data-check="2">
+                                <div class="check-box"><span class="material-symbols-rounded"
+                                        style="font-size:14px;display:none">check</span></div>
+                                Thank you for your e-mail. で感謝しているか？
+                            </div>
+                            <div class="check-item" data-check="3">
+                                <div class="check-box"><span class="material-symbols-rounded"
+                                        style="font-size:14px;display:none">check</span></div>
+                                意見質問に回答（I think ...）しているか？
+                            </div>
+                            <div class="check-item" data-check="4">
+                                <div class="check-box"><span class="material-symbols-rounded"
+                                        style="font-size:14px;display:none">check</span></div>
+                                下線部について2つ質問しているか？
+                            </div>
+                            <div class="check-item" data-check="5">
+                                <div class="check-box"><span class="material-symbols-rounded"
+                                        style="font-size:14px;display:none">check</span></div>
+                                語数は40〜50語の範囲内か？
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- STEP 3: 本番 -->
+        <div class="step-pane" id="step3">
+            <!-- Timer -->
+            <div class="timer-bar" id="timerBar">
+                <div class="timer-display">
+                    <span class="material-symbols-rounded">timer</span>
+                    <span class="timer-value" id="timerValue">15:00</span>
+                </div>
+                <div class="timer-controls">
+                    <button class="timer-ctrl primary" id="timerStart">
+                        <span class="material-symbols-rounded"
+                            style="font-size:16px;vertical-align:middle">play_arrow</span> スタート
+                    </button>
+                    <button class="timer-ctrl" id="timerPause" style="display:none">一時停止</button>
+                    <button class="timer-ctrl" id="timerReset">リセット</button>
+                </div>
+                <div class="timer-progress">
+                    <div class="timer-progress-fill" id="timerProgressFill"></div>
+                </div>
+            </div>
+
+            <div class="content-area">
+                <div class="section-header">
+                    <h2>⏱️ Step 3：本番力をつける</h2>
+                    <p class="section-desc">制限時間内に、ヒントなしでEメール返信を完成させましょう。</p>
+                </div>
+
+                <!-- メール（ヒントなし） -->
+                <div class="card">
+                    <div class="card-title">
+                        <span class="material-symbols-rounded">mail</span>
+                        Alexのメール（ヒントなし）
+                    </div>
+                    <div id="step3EmailDisplay"></div>
+                </div>
+
+                <!-- 作文エリア -->
+                <div class="card">
+                    <div class="card-title">
+                        <span class="material-symbols-rounded">edit_note</span>
+                        あなたのEメール返信
+                    </div>
+                    <textarea class="writing-area" id="step3Writing"
+                        placeholder="ここにEメール返信を書いてください（40〜50語）..."></textarea>
+                    <div class="word-counter" id="step3WordCounter">
+                        <span class="word-count-num under" id="step3WordNum">0</span>
+                        <span class="word-range">/ 40〜50語</span>
+                        <div class="word-bar">
+                            <div class="word-bar-fill under" id="step3WordBar"></div>
+                        </div>
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn btn-primary" id="step3Submit">
+                            <span class="material-symbols-rounded">send</span> 提出して模範解答を見る
+                        </button>
+                        <button class="btn btn-success ai-grade-btn" id="step3AiGrade">
+                            <span class="material-symbols-rounded">auto_awesome</span> AI採点
+                        </button>
+                    </div>
+                    <div class="btn-group image-input-group">
+                        <button class="btn btn-outline" id="step3CameraBtn">
+                            <span class="material-symbols-rounded">photo_camera</span> 撮影
+                        </button>
+                        <button class="btn btn-outline" id="step3FileBtn">
+                            <span class="material-symbols-rounded">image</span> ファイル
+                        </button>
+                        <button class="btn btn-outline" id="step3PasteBtn">
+                            <span class="material-symbols-rounded">content_paste</span> 貼り付け
+                        </button>
+                        <input type="file" accept="image/*" capture="environment" id="step3CameraInput"
+                            style="display:none">
+                        <input type="file" accept="image/*" id="step3FileInput"
+                            style="display:none">
+                    </div>
+                    <div id="step3ImagePreview" style="display:none"></div>
+                    <div id="step3ModelAnswer" style="display:none"></div>
+                    <div id="step3GradeResult" style="display:none"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="app-footer">
+            本アプリは学習支援を目的としています。公益財団法人 日本英語検定協会とは一切関係ありません。
+        </footer>
+    </div><!-- /#app -->
+
+    <script src="data-grade3-email.js"></script>
+    <script src="app-email.js"></script>
+</body>
+
+</html>
