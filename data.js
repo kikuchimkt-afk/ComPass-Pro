@@ -32,16 +32,19 @@ const THEMES = [
         chunks: [
             {
                 sentenceJa: "グループプロジェクトは多くの学校で一般的な活動です。",
+                literalJa: "グループプロジェクトは / 一般的な活動です / 多くの学校で",
                 answer: "Group projects are a common activity in many schools.",
                 pieces: ["Group projects", "are", "a common activity", "in many schools."]
             },
             {
                 sentenceJa: "チームワークや協力のスキルを身につけられるため有益です。",
+                literalJa: "それらは有益です / なぜなら / 生徒は身につけられるからです / チームワークと協力のスキルを",
                 answer: "They are beneficial because students can develop teamwork and cooperation skills.",
                 pieces: ["They are beneficial", "because", "students can develop", "teamwork and cooperation skills."]
             },
             {
                 sentenceJa: "しかし、一部のメンバーが分担を果たさないと、他のメンバーは不公平だと感じます。",
+                literalJa: "しかし / もし一部のメンバーが果たさないなら / 彼らの分担を / 他の人々は感じます / それは不公平だと",
                 answer: "However, if some members do not complete their share, others feel that it is unfair.",
                 pieces: ["However,", "if some members", "do not complete their share,", "others feel", "that it is unfair."]
             }
@@ -83,16 +86,19 @@ const THEMES = [
         chunks: [
             {
                 sentenceJa: "SNSは今日とても一般的です。",
+                literalJa: "SNSは / とても一般的です / 今日",
                 answer: "Social media is very common today.",
                 pieces: ["Social media", "is very common", "today."]
             },
             {
                 sentenceJa: "情報がオンラインで速く伝わるので、重要な出来事をすぐに知ることができます。",
+                literalJa: "それは可能にします / 人々が重要な出来事について学ぶことを / 素早く / なぜなら / 情報が伝わるからです / 速く / オンラインで",
                 answer: "It enables people to learn about important events quickly because information travels fast online.",
                 pieces: ["It enables people", "to learn about important events quickly", "because", "information travels fast online."]
             },
             {
                 sentenceJa: "しかし、誰でも確認せずに誤った情報を投稿できるため、人々は間違ったことを信じてしまうかもしれません。",
+                literalJa: "しかし / 人々は信じるかもしれません / 誤ったことを / なぜなら / 誰でも投稿できるからです / 誤った情報を / 確認せずに",
                 answer: "However, people may believe incorrect things since anyone can post wrong information without checking it.",
                 pieces: ["However,", "people may believe incorrect things", "since anyone can post", "wrong information", "without checking it."]
             }
@@ -135,16 +141,19 @@ const THEMES = [
         chunks: [
             {
                 sentenceJa: "キャンプはあらゆる年齢の人々の間でとても人気になっています。",
+                literalJa: "キャンプは / とても人気になっています / 人々の間で / すべての年齢の",
                 answer: "Camping has become very popular among people of all ages.",
                 pieces: ["Camping", "has become very popular", "among people", "of all ages."]
             },
             {
                 sentenceJa: "自然を体験し、日常生活から離れてリフレッシュできるのは良いことです。",
+                literalJa: "それは良いことです / 体験することは / 自然を / そして / 離れて休むことは / 日常生活から",
                 answer: "It is good to experience nature and take a break from daily life.",
                 pieces: ["It is good", "to experience nature", "and take a break", "from daily life."]
             },
             {
                 sentenceJa: "しかし、キャンプ用具を扱うときにはけがに気をつける必要があります。",
+                literalJa: "しかし / 彼らは注意する必要があります / けがに / 扱うとき / キャンプ用具を",
                 answer: "However, they need to be careful of injuries when handling camping equipment.",
                 pieces: ["However,", "they need to be careful", "of injuries", "when handling", "camping equipment."]
             }
@@ -186,16 +195,19 @@ const THEMES = [
         chunks: [
             {
                 sentenceJa: "学校での生徒の携帯電話の使用についてよく議論されています。",
+                literalJa: "人々はよく議論します / 使用について / 携帯電話の / 生徒による / 学校での",
                 answer: "People often discuss the use of mobile phones by students at school.",
                 pieces: ["People often discuss", "the use of mobile phones", "by students", "at school."]
             },
             {
                 sentenceJa: "携帯電話は緊急時に簡単に連絡できるため便利です。",
+                literalJa: "携帯電話は / 便利です / なぜなら / 生徒は簡単に連絡できるからです / 誰かに / 緊急時に",
                 answer: "Mobile phones are useful because students can easily contact someone in an emergency.",
                 pieces: ["Mobile phones are useful", "because students can easily contact", "someone", "in an emergency."]
             },
             {
                 sentenceJa: "しかし、生徒は自習中や授業中に集中力を失う可能性があります。",
+                literalJa: "しかし / 生徒は失うかもしれません / 集中力を / 自習中や / 授業中に",
                 answer: "However, students may lose focus during self-study or in class.",
                 pieces: ["However,", "students may lose focus", "during self-study", "or in class."]
             }
@@ -237,16 +249,19 @@ const THEMES = [
         chunks: [
             {
                 sentenceJa: "より多くの人々が日常生活でAIを使っています。",
+                literalJa: "より多くの人々が / 使っています / AIを / 日常生活で",
                 answer: "More people are using AI in everyday life.",
                 pieces: ["More people", "are using AI", "in everyday life."]
             },
             {
                 sentenceJa: "素早い答えや解決策を教えてくれるので役に立ちます。",
+                literalJa: "それは役に立ちます / なぜなら / それは与えてくれるからです / 私たちに / 素早い答えや解決策を",
                 answer: "It is helpful because it gives us quick answers or solutions.",
                 pieces: ["It is helpful", "because", "it gives us", "quick answers or solutions."]
             },
             {
                 sentenceJa: "しかし、いつもAIに頼っていると自分で考える習慣を失ってしまうかもしれません。",
+                literalJa: "しかし / 私たちは失うかもしれません / 習慣を / 自分で考えることの / もしいつもそれに頼っているなら",
                 answer: "However, we may lose the habit of thinking for ourselves if we always depend on it.",
                 pieces: ["However,", "we may lose the habit", "of thinking for ourselves", "if we always depend on it."]
             }

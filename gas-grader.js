@@ -1,4 +1,4 @@
-﻿/**
+/**
  * ComPass Pro AI Grader — Google Apps Script
  * 
  * ===== セットアップ手順 =====
@@ -165,8 +165,17 @@ function resolveGradeAndTask(gradeId, taskType) {
 function doPost(e) {
     try {
         const data = JSON.parse(e.postData.contents);
-        const { passage, modelAnswer, studentAnswer, passageJa,
-            imageBase64, imageMimeType, gradeId, taskType } = data;
+        const { action, passage, modelAnswer, studentAnswer, passageJa,
+            sentenceJa, imageBase64, imageMimeType, gradeId, taskType } = data;
+
+        // 1文ステップワイズ添削の場合 (アクション指定)
+        if (action === 'grade_sentence') {
+            if (!studentAnswer || studentAnswer.trim().length === 0) {
+                return jsonResponse({ error: '解答が入力されていません。' });
+            }
+            const result = gradeSentenceWithGemini(sentenceJa, modelAnswer, studentAnswer, gradeId);
+            return jsonResponse(result);
+        }
 
         // 画像入力の場合: OCR → 採点
         if (imageBase64) {
@@ -256,6 +265,88 @@ function gradeWithGemini(passage, modelAnswer, studentAnswer, passageJa, gradeId
                     }
                 },
                 required: ['totalScore', 'categories', 'overallComment', 'improvedVersion', 'errors']
+            }
+        }
+    };
+
+    const options = {
+        method: 'post',
+        contentType: 'application/json',
+        payload: JSON.stringify(payload),
+        muteHttpExceptions: true
+    };
+
+    const response = UrlFetchApp.fetch(url, options);
+    const json = JSON.parse(response.getContentText());
+
+    if (json.error) {
+        return { error: 'Gemini APIエラー: ' + json.error.message };
+    }
+
+    try {
+        const text = json.candidates[0].content.parts[0].text;
+        return JSON.parse(text);
+    } catch (parseErr) {
+        return { error: 'レスポンスの解析に失敗しました。' };
+    }
+}
+
+// ===== 1文ステップワイズ添削用 Gemini API 呼び出し =====
+function gradeSentenceWithGemini(sentenceJa, modelAnswer, studentAnswer, gradeId) {
+    const apiKey = PropertiesService.getScriptProperties().getProperty('GEMINI_API_KEY');
+    if (!apiKey) {
+        return { error: 'APIキーが設定されていません。' };
+    }
+
+    const { gradeLabel } = resolveGradeAndTask(gradeId, 'Summary'); // ラベル取得用
+
+    const prompt = `あなたは優しくて丁寧な英語教師です。（対象は英検${gradeLabel}レベル）
+生徒が日本語の課題文を英語に翻訳（または作文）する練習をしています。
+生徒が書いた1文を丁寧に添削し、フィードバックを返してください。
+
+【重要方針】
+英語学習において「主語(Subject)」と「述語動詞(Verb)」の関係を抽出して明確に理解させることが最も重要です。
+必ず模範解答の文から主語と動詞を抽出し、生徒の解答の主語・動詞が適切だったか（単数複数の一致、時制など）を解説に含めてください。
+
+課題文（日本語）: ${sentenceJa}
+模範解答: ${modelAnswer}
+生徒の解答: ${studentAnswer}
+
+以下の要件に沿ってJSONフォーマットで出力してください:
+1. "score": 0〜100のスコア。模範解答と一言一句同じでなくても、文法が正しく意味が通っていれば高得点をあげてください。
+2. "isCorrect": 意味が通じ、深刻な文法ミスがなければ true。
+3. "comment": 先生からの温かいコメント。主語(S)と述語動詞(V)の関係性に必ず触れつつ、間違えやすいポイントや気づきを解説してください。
+4. "subjectVerb": 模範解答の正解となる主語(subject)と動詞(verb)の文字列。
+5. "corrected": 文法ミスがあれば修正した文。もし生徒の文法が完璧なら生徒の解答をそのまま入れてください。
+6. "betterExpression": ネイティブから見てさらに自然で美しい言い回しや、別の表現の提案（任意）`;
+
+    const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=' + apiKey;
+
+    const payload = {
+        contents: [{
+            parts: [{ text: prompt }]
+        }],
+        generationConfig: {
+            temperature: 0.2, // ブレを少なく
+            responseMimeType: 'application/json',
+            responseSchema: {
+                type: 'OBJECT',
+                properties: {
+                    score: { type: 'INTEGER', description: '正確さと自然さに基づくスコア(0-100)' },
+                    isCorrect: { type: 'BOOLEAN', description: '合格点(true/false)' },
+                    comment: { type: 'STRING', description: '生徒への優しく丁寧な解説コメント。主語と動詞の関係性に言及すること。' },
+                    subjectVerb: {
+                        type: 'OBJECT',
+                        properties: {
+                            subject: { type: 'STRING', description: 'この文の主語(S)' },
+                            verb: { type: 'STRING', description: 'この文の述語動詞(V)' }
+                        },
+                        required: ['subject', 'verb']
+                    },
+                    corrected: { type: 'STRING', description: '生徒の文の文法的修正。ミスがなければ生徒の文をそのまま返す。' },
+                    betterExpression: { type: 'STRING', description: 'さらに洗練された別の言い方（提案）' }
+                },
+                required: ['score', 'isCorrect', 'comment', 'subjectVerb', 'corrected']
             }
         }
     };

@@ -19,6 +19,9 @@
     let step1Checked = false;
     let step2ChunkIndex = 0;
     let step2ChunkAnswers = [];
+    let transDrillIndex = 0;
+    let transDrillScores = [];
+    let transDrillChecked = false;
     let timerInterval = null;
     let timerSeconds = WP_TIMER_SEC;
     let timerRunning = false;
@@ -457,6 +460,9 @@ ${getPrintStyles(minWords, maxWords)}
         step1Checked = false;
         step2ChunkIndex = 0;
         step2ChunkAnswers = [];
+        transDrillIndex = 0;
+        transDrillScores = [];
+        transDrillChecked = false;
         if ($('step2Writing')) $('step2Writing').value = '';
         if ($('step3Writing')) $('step3Writing').value = '';
         if ($('step2ModelAnswer')) $('step2ModelAnswer').style.display = 'none';
@@ -655,6 +661,7 @@ ${getPrintStyles(minWords, maxWords)}
             renderParaphraseTable(theme);
         }
         renderChunkExercise(theme);
+        renderTransDrill(theme);
         renderStep2Hints(theme);
         updateWordCounter('step2');
     }
@@ -886,6 +893,289 @@ ${getPrintStyles(minWords, maxWords)}
                 <span style="font-size:0.78rem;color:var(--text-secondary);margin-left:8px">${theme.passageJa[p.key].substring(0, 40)}…</span>
             </div>
         `).join('');
+    }
+
+    // ===== TRANSLATION DRILL (日→英変換ドリル) =====
+    function renderTransDrill(theme) {
+        const container = $('transDrill');
+        if (!container) return;
+        const chunks = theme.chunks;
+        const idx = transDrillIndex;
+
+        // Update progress bar
+        const progressFill = $('transDrillProgress');
+        const progressText = $('transDrillProgressText');
+        if (progressFill && progressText) {
+            const pct = Math.round(((idx) / chunks.length) * 100);
+            progressFill.style.width = pct + '%';
+            progressText.textContent = `${Math.min(idx + 1, chunks.length)} / ${chunks.length}`;
+        }
+
+        if (idx >= chunks.length) {
+            // All done — show score
+            const correct = transDrillScores.filter(s => s >= 80).length;
+            const partial = transDrillScores.filter(s => s >= 40 && s < 80).length;
+            const emoji = correct === chunks.length ? '🎉' : correct >= chunks.length / 2 ? '👍' : '💪';
+            container.innerHTML = `
+                <div class="trans-drill-score fade-in">
+                    <div class="score-circle">
+                        <div class="score-num">${correct}</div>
+                        <div class="score-max">/ ${chunks.length}</div>
+                    </div>
+                    <div class="score-label">${emoji} 日英変換ドリル完了！</div>
+                    <div style="font-size:0.78rem;color:var(--text-secondary);margin-top:6px">
+                        完全一致: ${correct}文 ／ 部分一致: ${partial}文
+                    </div>
+                    <div class="btn-group" style="justify-content:center;margin-top:14px">
+                        <button class="btn btn-secondary" id="transDrillReset">
+                            <span class="material-symbols-rounded">refresh</span> もう一度
+                        </button>
+                    </div>
+                </div>
+            `;
+            $('transDrillReset').addEventListener('click', () => {
+                transDrillIndex = 0;
+                transDrillScores = [];
+                transDrillChecked = false;
+                renderTransDrill(theme);
+            });
+            return;
+        }
+
+        const chunk = chunks[idx];
+        transDrillChecked = false;
+
+        container.innerHTML = `
+            <div class="trans-drill fade-in">
+                <div class="trans-drill-step-label">
+                    <span class="step-badge">${idx + 1}</span>
+                    ${chunks.length}文中 ${idx + 1}文目
+                </div>
+                <div class="trans-drill-prompt">
+                    <div class="trans-drill-prompt-label">日本語</div>
+                    <div class="trans-drill-prompt-text">${chunk.sentenceJa}</div>
+                    ${chunk.literalJa ? `
+                        <div class="trans-drill-ja-literal" style="margin-top: 8px; font-size: 0.85rem; color: var(--text-secondary); border-top: 1px dashed var(--border-color); padding-top: 8px;">
+                            <span class="material-symbols-rounded" style="font-size:14px; vertical-align:middle; color:var(--accent-primary)">translate</span> 
+                            <strong style="color:var(--text-secondary)">ヒント（英語の語順）:</strong> ${chunk.literalJa}
+                        </div>
+                    ` : ''}
+                </div>
+                <textarea class="trans-drill-input" id="transDrillInput" 
+                    placeholder="上の日本語を英語で書いてみましょう..."></textarea>
+                <div class="trans-drill-hint" id="transDrillHintBtn">
+                    <span class="material-symbols-rounded" style="font-size:16px">lightbulb</span>
+                    ヒントを見る（最初の数語）
+                    <div class="trans-drill-hint-text" id="transDrillHintText">
+                        ${chunk.answer.split(' ').slice(0, 3).join(' ')} ...
+                    </div>
+                </div>
+                <div class="btn-group" style="margin-top:12px">
+                    <button class="btn btn-primary" id="transDrillCheck">
+                        <span class="material-symbols-rounded">check</span> 確認
+                    </button>
+                </div>
+                <div id="transDrillResult"></div>
+            </div>
+        `;
+
+        // Hint toggle
+        $('transDrillHintBtn').addEventListener('click', () => {
+            $('transDrillHintText').classList.toggle('visible');
+        });
+
+        // Check answer with Gemini API
+        $('transDrillCheck').addEventListener('click', async () => {
+            if (transDrillChecked) return;
+            const userAnswer = $('transDrillInput').value.trim();
+            if (!userAnswer) return;
+            
+            const gasUrl = GAS_URL || localStorage.getItem('writepass-gas-url');
+            if (!gasUrl) {
+                showGasSetup('step2'); // Reuse step2 modal if API key is missing
+                return;
+            }
+
+            transDrillChecked = true;
+            
+            // UI state: loading
+            const checkBtn = $('transDrillCheck');
+            const resultDiv = $('transDrillResult');
+            const originalBtnText = checkBtn.innerHTML;
+            checkBtn.disabled = true;
+            checkBtn.innerHTML = '<span class="material-symbols-rounded spinner">progress_activity</span> 先生が添削中...';
+            resultDiv.innerHTML = `<div class="grade-loading" style="margin-top:12px"><div class="grade-loading-dots"><span></span><span></span><span></span></div><div>文法と自然さを丁寧にチェックしています...</div></div>`;
+
+            try {
+                const payload = {
+                    action: 'grade_sentence',
+                    sentenceJa: chunk.sentenceJa,
+                    modelAnswer: chunk.answer,
+                    studentAnswer: userAnswer,
+                    gradeId: (typeof WRITEPASS_CONFIG !== 'undefined' && WRITEPASS_CONFIG.gradeId) || 'grade_pre2plus'
+                };
+
+                const response = await fetch(gasUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify(payload)
+                });
+                const result = await response.json();
+
+                if (result.error) {
+                    throw new Error(result.error);
+                }
+
+                // If success, store score
+                transDrillScores.push(result.score);
+                const isCorrect = result.isCorrect;
+
+                let diffLabel = isCorrect ? 'correct' : 'wrong';
+                let diffIcon = isCorrect ? 'check_circle' : 'info';
+                let resultTitle = isCorrect ? '🎉 いいですね！' : '💪 もう一息です！';
+
+                resultDiv.innerHTML = `
+                    <div class="trans-drill-diff fade-in">
+                        <div class="trans-drill-diff-label ${diffLabel}">
+                            <span class="material-symbols-rounded" style="font-size:18px">${diffIcon}</span>
+                            ${resultTitle}（スコア: ${result.score}/100）
+                        </div>
+                        
+                        <!-- 先生のコメント -->
+                        <div class="trans-drill-answer-row" style="margin-top:8px; margin-bottom:12px">
+                            <div class="row-label">👩‍🏫 先生からのフィードバック</div>
+                            <div class="row-text" style="background:rgba(108, 99, 255, 0.08); border-left:3px solid var(--accent-primary); line-height:1.6">
+                                ${escapeHtml(result.comment).replace(/\n/g, '<br>')}
+                            </div>
+                        </div>
+
+                        ${result.subjectVerb ? `
+                            <!-- 主語と動詞の骨格 -->
+                            <div class="trans-drill-answer-row" style="margin-bottom:12px">
+                                <div class="row-label">💡 この文の骨格（主語と述語の関係）</div>
+                                <div class="row-text" style="background:var(--bg-card); border: 1px dashed var(--accent-primary); display:flex; gap:16px; align-items:center">
+                                    <div><strong style="color:var(--accent-primary)">主語(S):</strong> ${escapeHtml(result.subjectVerb.subject)}</div>
+                                    <span class="material-symbols-rounded" style="color:var(--text-secondary); font-size:16px">arrow_right_alt</span>
+                                    <div><strong style="color:var(--accent-secondary)">動詞(V):</strong> ${escapeHtml(result.subjectVerb.verb)}</div>
+                                </div>
+                            </div>
+                        ` : ''}
+
+                        ${(!isCorrect || result.corrected !== userAnswer) ? `
+                            <div class="trans-drill-answer-row">
+                                <div class="row-label">あなたの解答</div>
+                                <div class="row-text user-text">${escapeHtml(userAnswer)}</div>
+                            </div>
+                            <div class="trans-drill-answer-row">
+                                <div class="row-label">✍️ 修正案（文法的な訂正）</div>
+                                <div class="row-text model-text">${escapeHtml(result.corrected)}</div>
+                            </div>
+                        ` : `
+                            <div class="trans-drill-answer-row">
+                                <div class="row-text correct-text">${escapeHtml(userAnswer)}</div>
+                            </div>
+                        `}
+
+                        ${result.betterExpression ? `
+                            <div class="trans-drill-answer-row" style="margin-top:8px">
+                                <div class="row-label">💡 さらに自然な表現の例</div>
+                                <div class="row-text" style="background:var(--bg-card); border: 1px solid var(--accent-secondary); color:var(--text-primary)">
+                                    ${escapeHtml(result.betterExpression)}
+                                </div>
+                            </div>
+                        ` : ''}
+
+                        <div class="btn-group" style="margin-top:16px">
+                            <button class="btn btn-primary" id="transDrillNext">
+                                <span class="material-symbols-rounded">arrow_forward</span>
+                                ${idx + 1 < chunks.length ? '次の文へ' : '結果を見る'}
+                            </button>
+                        </div>
+                    </div>
+                `;
+
+                $('transDrillInput').readOnly = true;
+                checkBtn.style.display = 'none';
+
+                $('transDrillNext').addEventListener('click', () => {
+                    transDrillIndex++;
+                    renderTransDrill(getTheme());
+                });
+
+            } catch (err) {
+                // Return generic error state
+                transDrillChecked = false;
+                checkBtn.disabled = false;
+                checkBtn.innerHTML = originalBtnText;
+                resultDiv.innerHTML = `
+                    <div class="grade-error" style="margin-top:12px; padding:12px; background:rgba(248,113,113,0.1); border-left:3px solid var(--error); border-radius:4px; font-size:0.85rem">
+                        <span class="material-symbols-rounded" style="vertical-align:middle; font-size:16px">error</span>
+                        通信エラーが発生しました: ${escapeHtml(err.message)}<br>
+                        ネットワーク設定やAPIキー設定を確認してもう一度お試しください。
+                    </div>
+                `;
+            }
+        });
+
+        // Enter key to submit
+        $('transDrillInput').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                $('transDrillCheck').click();
+            }
+        });
+    }
+
+    // キーワード一致率で翻訳スコアを計算
+    function compareTranslation(userAnswer, modelAnswer) {
+        const normalize = (str) => str.toLowerCase()
+            .replace(/[^a-z0-9\s]/g, '')
+            .split(/\s+/)
+            .filter(w => w.length > 0);
+
+        const userWords = normalize(userAnswer);
+        const modelWords = normalize(modelAnswer);
+
+        if (userWords.length === 0 || modelWords.length === 0) return 0;
+
+        // Bi-gram matching for better accuracy
+        const getBigrams = (words) => {
+            const bigrams = [];
+            for (let i = 0; i < words.length - 1; i++) {
+                bigrams.push(words[i] + ' ' + words[i + 1]);
+            }
+            return bigrams;
+        };
+
+        // Word-level matching
+        const stopWords = new Set(['a', 'an', 'the', 'is', 'are', 'was', 'were', 'it', 'to', 'of', 'in', 'for', 'and', 'or', 'but']);
+        const meaningfulModel = modelWords.filter(w => !stopWords.has(w));
+        const meaningfulUser = userWords.filter(w => !stopWords.has(w));
+
+        let matchCount = 0;
+        const usedIndices = new Set();
+        meaningfulModel.forEach(mw => {
+            const idx = meaningfulUser.findIndex((uw, i) => !usedIndices.has(i) && uw === mw);
+            if (idx !== -1) {
+                matchCount++;
+                usedIndices.add(idx);
+            }
+        });
+
+        const wordScore = meaningfulModel.length > 0 ? matchCount / meaningfulModel.length : 0;
+
+        // Bigram matching
+        const modelBigrams = getBigrams(modelWords);
+        const userBigrams = getBigrams(userWords);
+        let bigramMatch = 0;
+        modelBigrams.forEach(mb => {
+            if (userBigrams.includes(mb)) bigramMatch++;
+        });
+        const bigramScore = modelBigrams.length > 0 ? bigramMatch / modelBigrams.length : 0;
+
+        // Combined score (word + bigram)
+        const combined = wordScore * 0.5 + bigramScore * 0.5;
+        return Math.round(combined * 100);
     }
 
     // ===== STEP 3: 本番力 =====
