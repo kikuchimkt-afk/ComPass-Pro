@@ -177,6 +177,16 @@ function doPost(e) {
             return jsonResponse(result);
         }
 
+        // 先生への追加質問（Q&Aチャット）の場合
+        if (action === 'ask_teacher') {
+            const { question, teacherFeedback } = data;
+            if (!question || question.trim().length === 0) {
+                return jsonResponse({ error: '質問が入力されていません。' });
+            }
+            const result = askTeacherWithGemini(sentenceJa, studentAnswer, modelAnswer, teacherFeedback, question, gradeId);
+            return jsonResponse(result);
+        }
+
         // 画像入力の場合: OCR → 採点
         if (imageBase64) {
             const ocrText = ocrWithGemini(imageBase64, imageMimeType || 'image/jpeg');
@@ -347,6 +357,74 @@ function gradeSentenceWithGemini(sentenceJa, modelAnswer, studentAnswer, gradeId
                     betterExpression: { type: 'STRING', description: 'さらに洗練された別の言い方（提案）' }
                 },
                 required: ['score', 'isCorrect', 'comment', 'subjectVerb', 'corrected']
+            }
+        }
+    };
+
+    const options = {
+        method: 'post',
+        contentType: 'application/json',
+        payload: JSON.stringify(payload),
+        muteHttpExceptions: true
+    };
+
+    const response = UrlFetchApp.fetch(url, options);
+    const json = JSON.parse(response.getContentText());
+
+    if (json.error) {
+        return { error: 'Gemini APIエラー: ' + json.error.message };
+    }
+
+    try {
+        const text = json.candidates[0].content.parts[0].text;
+        return JSON.parse(text);
+    } catch (parseErr) {
+        return { error: 'レスポンスの解析に失敗しました。' };
+    }
+}
+
+// ===== 先生への追加質問（Q&Aチャット用） =====
+function askTeacherWithGemini(sentenceJa, studentAnswer, modelAnswer, teacherFeedback, question, gradeId) {
+    const apiKey = PropertiesService.getScriptProperties().getProperty('GEMINI_API_KEY');
+    if (!apiKey) {
+        return { error: 'APIキーが設定されていません。' };
+    }
+
+    const { gradeLabel } = resolveGradeAndTask(gradeId, 'Summary');
+
+    const prompt = `あなたは優しくて知識豊富な英語教師です。（対象は英検${gradeLabel}レベルの中高生）
+先ほど、生徒の英作文を添削したところ、生徒から追加の質問が来ました。
+
+【前回の添削状況】
+課題文（日本語）: ${sentenceJa}
+生徒の書いた英文: ${studentAnswer}
+模範解答: ${modelAnswer}
+前回の先生の解説: ${teacherFeedback}
+
+【生徒からの質問】
+${question}
+
+返答の要件:
+1. 質問に対して、正確かつ分かりやすく丁寧に答えてください。
+2. 専門用語を使いすぎず、中高生にもすっと理解できる言葉で説明してください。
+3. どうしても必要な場合を除き、簡潔に（3〜4文程度で）まとめてください。
+4. 先生が直接生徒に話しかけるトーン（例：「いい質問ですね！」「〜という違いがあるんですよ」など）で書いてください。`;
+
+    const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=' + apiKey;
+
+    const payload = {
+        contents: [{
+            parts: [{ text: prompt }]
+        }],
+        generationConfig: {
+            temperature: 0.3,
+            responseMimeType: 'application/json',
+            responseSchema: {
+                type: 'OBJECT',
+                properties: {
+                    answer: { type: 'STRING', description: '生徒への回答テキスト。改行を含めて読みやすくすること。' }
+                },
+                required: ['answer']
             }
         }
     };

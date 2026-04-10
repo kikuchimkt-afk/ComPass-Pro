@@ -1091,6 +1091,16 @@ ${getPrintStyles(minWords, maxWords)}
                                 ${idx + 1 < chunks.length ? '次の文へ' : '結果を見る'}
                             </button>
                         </div>
+
+                        <!-- 先生への質問コーナー -->
+                        <div class="trans-drill-qa fade-in" style="margin-top:20px; padding-top:16px; border-top:1px dashed var(--border-color);">
+                            <div class="row-label" style="margin-bottom:8px">🙋‍♀️ 先生への質問・疑問を解決しよう</div>
+                            <div id="qaHistory" style="display:flex; flex-direction:column; gap:12px; margin-bottom:12px"></div>
+                            <div style="display:flex; gap:8px">
+                                <input type="text" id="qaInput" class="trans-drill-input" style="flex:1; margin:0; padding:8px 12px; font-size:0.9rem" placeholder="先生に質問する... (例: generalとcommonの違いは？)">
+                                <button class="btn btn-secondary" id="qaSend" style="padding: 0 16px; border-radius:4px"><span class="material-symbols-rounded">send</span></button>
+                            </div>
+                        </div>
                     </div>
                 `;
 
@@ -1100,6 +1110,72 @@ ${getPrintStyles(minWords, maxWords)}
                 $('transDrillNext').addEventListener('click', () => {
                     transDrillIndex++;
                     renderTransDrill(getTheme());
+                });
+
+                // Q&A logic
+                const qaInput = $('qaInput');
+                const qaSend = $('qaSend');
+                const qaHistory = $('qaHistory');
+
+                const handleQuestion = async () => {
+                    const question = qaInput.value.trim();
+                    if (!question) return;
+
+                    // Disable input
+                    qaInput.disabled = true;
+                    qaSend.disabled = true;
+                    
+                    // Add user message to UI
+                    const userMsg = document.createElement('div');
+                    userMsg.style.cssText = "align-self: flex-end; background: var(--bg-card); border: 1px solid var(--border-color); padding: 8px 12px; border-radius: 12px 12px 0 12px; font-size:0.9rem; max-width:85%";
+                    userMsg.innerHTML = `<strong style="font-size:0.75rem; color:var(--text-secondary); display:block; margin-bottom:2px">あなた</strong>${escapeHtml(question)}`;
+                    qaHistory.appendChild(userMsg);
+
+                    // Add loading indicator
+                    const aiMsg = document.createElement('div');
+                    aiMsg.style.cssText = "align-self: flex-start; background: rgba(108, 99, 255, 0.08); border: 1px solid rgba(108, 99, 255, 0.2); padding: 8px 12px; border-radius: 12px 12px 12px 0; font-size:0.9rem; max-width:85%";
+                    aiMsg.innerHTML = `<strong style="font-size:0.75rem; color:var(--accent-primary); display:block; margin-bottom:2px">👩‍🏫 先生</strong><span class="material-symbols-rounded spinner" style="font-size:16px; vertical-align:middle">progress_activity</span> 入力中...`;
+                    qaHistory.appendChild(aiMsg);
+
+                    qaInput.value = '';
+
+                    try {
+                        const payload = {
+                            action: 'ask_teacher',
+                            question: question,
+                            sentenceJa: chunk.sentenceJa,
+                            studentAnswer: userAnswer,
+                            modelAnswer: chunk.answer,
+                            teacherFeedback: result.comment,
+                            gradeId: (typeof WRITEPASS_CONFIG !== 'undefined' && WRITEPASS_CONFIG.gradeId) || 'grade_pre2plus'
+                        };
+
+                        const response = await fetch(gasUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                            body: JSON.stringify(payload)
+                        });
+                        const qaResult = await response.json();
+
+                        if (qaResult.error) {
+                            throw new Error(qaResult.error);
+                        }
+
+                        // Update UI with AI answer
+                        aiMsg.innerHTML = `<strong style="font-size:0.75rem; color:var(--accent-primary); display:block; margin-bottom:2px">👩‍🏫 先生</strong>${escapeHtml(qaResult.answer).replace(/\n/g, '<br>')}`;
+                        
+                    } catch (err) {
+                        aiMsg.innerHTML = `<span style="color:var(--error)"><span class="material-symbols-rounded" style="font-size:16px; vertical-align:middle">error</span> エラーが発生しました。時間を置いてお試しください。</span>`;
+                    }
+
+                    qaInput.disabled = false;
+                    qaSend.disabled = false;
+                    qaInput.focus();
+                };
+
+                qaSend.addEventListener('click', handleQuestion);
+                qaInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') handleQuestion();
                 });
 
             } catch (err) {
