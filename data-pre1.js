@@ -43,21 +43,25 @@ const THEMES = [
         chunks: [
             {
                 sentenceJa: "一部の国はすべての生徒に無料給食を提供しており、多くの人がプログラムを支持している。",
+                literalJa: "一部の国は / 今や提供している / 無料の学校給食を / すべての生徒に / そして / 多くの人々が / 支持している / これらのプログラムを",
                 answer: "Some countries now offer free school lunches to all students, and many people support these programs.",
                 pieces: ["Some countries", "now offer", "free school lunches", "to all students,", "and many people", "support these programs."]
             },
             {
                 sentenceJa: "賛成派は、栄養のある食事が生徒の集中力向上と成績改善に役立つと主張している。",
+                literalJa: "賛成派は / 主張している / 次のことを / 栄養のある食事が / 助けると / 生徒が / より良く集中し / そして / 獲得するのを / より高いテストの点数を",
                 answer: "Proponents argue that nutritious meals help students concentrate better and achieve higher test scores.",
                 pieces: ["Proponents argue that", "nutritious meals", "help students", "concentrate better", "and achieve", "higher test scores."]
             },
             {
                 sentenceJa: "また忙しい保護者が食事準備の時間を節約するのにも役立つ。",
+                literalJa: "それらはまた助ける / 忙しい保護者を / 時間を節約することによって / 食事の準備に費やされる",
                 answer: "They also help busy parents by saving time spent on meal preparation.",
                 pieces: ["They also", "help busy parents", "by saving time", "spent on", "meal preparation."]
             },
             {
                 sentenceJa: "しかし反対派は、すべての生徒が完食するわけではなく、大量の食品廃棄が生じると指摘する。",
+                literalJa: "しかしながら、 / 反対派は指摘している / 次のことを / すべての生徒が～というわけではない / 彼らの食事を完食する / その結果～をもたらしている / かなりの食品廃棄を",
                 answer: "However, opponents point out that not all students finish their meals, resulting in significant food waste.",
                 pieces: ["However,", "opponents point out that", "not all students", "finish their meals,", "resulting in", "significant food waste."]
             }
@@ -103,6 +107,7 @@ const THEMES = [
         chunks: [
             {
                 sentenceJa: "米国政府は宇宙探査に公的資金を使ってきたが、民間企業も資金を受け取るべきだと考える人がいる。",
+                literalJa: "米国政府は / 使ってきた / 公的資金を / 宇宙探査のために / しかし / 一部の人々は考えている / 民間企業も / また受け取るべきだと / 政府の資金を",
                 answer: "The U.S. government has used public money for space exploration, but some believe private companies should also receive government funding.",
                 pieces: ["The U.S. government", "has used public money", "for space exploration,", "but some believe", "private companies", "should also receive", "government funding."]
             },

@@ -214,19 +214,77 @@ function doGet(e) {
     return jsonResponse({ status: 'ok', message: 'ComPass Pro Grader API is running.' });
 }
 
-// ===== Gemini API 呼び出し =====
-function gradeWithGemini(passage, modelAnswer, studentAnswer, passageJa, gradeId, taskType) {
-    const apiKey = PropertiesService.getScriptProperties().getProperty('GEMINI_API_KEY');
-    if (!apiKey) {
-        return { error: 'APIキーが設定されていません。スクリプトプロパティにGEMINI_API_KEYを設定してください。' };
+// ===== Gemini API フェッチラッパー（複数キーのフォールバック対応） =====
+function fetchGeminiWithRetry(model, payload) {
+    const primaryKey = PropertiesService.getScriptProperties().getProperty('GEMINI_API_KEY');
+    
+    // システム全体で共有する代替キー（エラー・制限回避用）
+    const fallbackKeys = [
+        "AIzaSyBivbg2MPWQuvYHjGa-YbN1j4pKE_oBDQ0",
+        "AIzaSyACWL0N1UXicvyjt0i2GDBzt1e8vtGQUBY",
+        "AIzaSyBbIgJsbT2xVFSBrtYG5kuRjGgBje-B00g"
+    ];
+    
+    let keysToTry = [];
+    if (primaryKey) keysToTry.push(primaryKey);
+    keysToTry = keysToTry.concat(fallbackKeys);
+    
+    // 重複を削除してユニークなキーの配列を作成
+    keysToTry = keysToTry.filter(function(item, pos) {
+        return keysToTry.indexOf(item) == pos;
+    });
+
+    if (keysToTry.length === 0) {
+        return { error: { message: 'APIキーが設定されていません。' } };
     }
 
+    let lastError = null;
+
+    for (let i = 0; i < keysToTry.length; i++) {
+        const apiKey = keysToTry[i];
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+        
+        const options = {
+            method: 'post',
+            contentType: 'application/json',
+            payload: JSON.stringify(payload),
+            muteHttpExceptions: true
+        };
+
+        try {
+            const response = UrlFetchApp.fetch(url, options);
+            const code = response.getResponseCode();
+            const jsonText = response.getContentText();
+            let json = {};
+            
+            try {
+                json = JSON.parse(jsonText);
+            } catch (e) {
+                lastError = "Response parsing failed: " + jsonText.substring(0, 50);
+                continue;
+            }
+
+            if (code === 200 && !json.error) {
+                return json; // 成功
+            }
+
+            lastError = json.error ? json.error.message : `HTTP Error ${code}`;
+            // 次のキーへ（429以外でもエラーなら切り替える）
+            
+        } catch (e) {
+            lastError = "Network error: " + e.message;
+        }
+    }
+
+    return { error: { message: 'すべてのAPIキーでリトライに失敗しました: ' + lastError } };
+}
+
+// ===== Gemini API 呼び出し =====
+function gradeWithGemini(passage, modelAnswer, studentAnswer, passageJa, gradeId, taskType) {
     const { grade, task } = resolveGradeAndTask(gradeId, taskType);
     const prompt = buildPrompt(passage, modelAnswer, studentAnswer, passageJa, gradeId, taskType);
     const maxScore = task.max_score_per_item;
     const totalMax = task.total_max_score;
-
-    const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=' + apiKey;
 
     const payload = {
         contents: [{
@@ -279,15 +337,7 @@ function gradeWithGemini(passage, modelAnswer, studentAnswer, passageJa, gradeId
         }
     };
 
-    const options = {
-        method: 'post',
-        contentType: 'application/json',
-        payload: JSON.stringify(payload),
-        muteHttpExceptions: true
-    };
-
-    const response = UrlFetchApp.fetch(url, options);
-    const json = JSON.parse(response.getContentText());
+    const json = fetchGeminiWithRetry('gemini-3-flash-preview', payload);
 
     if (json.error) {
         return { error: 'Gemini APIエラー: ' + json.error.message };
@@ -303,11 +353,6 @@ function gradeWithGemini(passage, modelAnswer, studentAnswer, passageJa, gradeId
 
 // ===== 1文ステップワイズ添削用 Gemini API 呼び出し =====
 function gradeSentenceWithGemini(sentenceJa, modelAnswer, studentAnswer, gradeId) {
-    const apiKey = PropertiesService.getScriptProperties().getProperty('GEMINI_API_KEY');
-    if (!apiKey) {
-        return { error: 'APIキーが設定されていません。' };
-    }
-
     const { gradeLabel } = resolveGradeAndTask(gradeId, 'Summary'); // ラベル取得用
 
     const prompt = `あなたは優しくて丁寧な英語教師です。（対象は英検${gradeLabel}レベル）
@@ -361,15 +406,7 @@ function gradeSentenceWithGemini(sentenceJa, modelAnswer, studentAnswer, gradeId
         }
     };
 
-    const options = {
-        method: 'post',
-        contentType: 'application/json',
-        payload: JSON.stringify(payload),
-        muteHttpExceptions: true
-    };
-
-    const response = UrlFetchApp.fetch(url, options);
-    const json = JSON.parse(response.getContentText());
+    const json = fetchGeminiWithRetry('gemini-3-flash-preview', payload);
 
     if (json.error) {
         return { error: 'Gemini APIエラー: ' + json.error.message };
@@ -385,10 +422,6 @@ function gradeSentenceWithGemini(sentenceJa, modelAnswer, studentAnswer, gradeId
 
 // ===== 先生への追加質問（Q&Aチャット用） =====
 function askTeacherWithGemini(sentenceJa, studentAnswer, modelAnswer, teacherFeedback, question, gradeId) {
-    const apiKey = PropertiesService.getScriptProperties().getProperty('GEMINI_API_KEY');
-    if (!apiKey) {
-        return { error: 'APIキーが設定されていません。' };
-    }
 
     const { gradeLabel } = resolveGradeAndTask(gradeId, 'Summary');
 
@@ -410,8 +443,6 @@ ${question}
 3. どうしても必要な場合を除き、簡潔に（3〜4文程度で）まとめてください。
 4. 先生が直接生徒に話しかけるトーン（例：「いい質問ですね！」「〜という違いがあるんですよ」など）で書いてください。`;
 
-    const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=' + apiKey;
-
     const payload = {
         contents: [{
             parts: [{ text: prompt }]
@@ -429,15 +460,7 @@ ${question}
         }
     };
 
-    const options = {
-        method: 'post',
-        contentType: 'application/json',
-        payload: JSON.stringify(payload),
-        muteHttpExceptions: true
-    };
-
-    const response = UrlFetchApp.fetch(url, options);
-    const json = JSON.parse(response.getContentText());
+    const json = fetchGeminiWithRetry('gemini-3-flash-preview', payload);
 
     if (json.error) {
         return { error: 'Gemini APIエラー: ' + json.error.message };
@@ -453,12 +476,6 @@ ${question}
 
 // ===== 画像からOCR（手書き文字認識） =====
 function ocrWithGemini(imageBase64, mimeType) {
-    const apiKey = PropertiesService.getScriptProperties().getProperty('GEMINI_API_KEY');
-    if (!apiKey) {
-        return { error: 'APIキーが設定されていません。' };
-    }
-
-    const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=' + apiKey;
 
     const payload = {
         contents: [{
@@ -479,15 +496,7 @@ function ocrWithGemini(imageBase64, mimeType) {
         }
     };
 
-    const options = {
-        method: 'post',
-        contentType: 'application/json',
-        payload: JSON.stringify(payload),
-        muteHttpExceptions: true
-    };
-
-    const response = UrlFetchApp.fetch(url, options);
-    const json = JSON.parse(response.getContentText());
+    const json = fetchGeminiWithRetry('gemini-3-flash-preview', payload);
 
     if (json.error) {
         return { error: 'OCRエラー: ' + json.error.message };

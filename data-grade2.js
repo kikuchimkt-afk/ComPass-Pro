@@ -43,16 +43,19 @@ const THEMES = [
         chunks: [
             {
                 sentenceJa: "一部の大学生はキャンパスに行く代わりにオンライン授業を選んでいる。",
+                literalJa: "一部の大学生は / 選ぶ / オンライン授業を受けることを / 〜の代わりに / キャンパスに行くことの",
                 answer: "Some university students choose to take online classes instead of going to campus.",
                 pieces: ["Some university students", "choose to take", "online classes", "instead of", "going to campus."]
             },
             {
                 sentenceJa: "キャンパスから遠い学生は通学時間を節約でき、録画講義を繰り返し見返せる。",
+                literalJa: "学生たちは / キャンパスから遠い / 節約できる / 通学時間を / そして彼らは / 見直すことができる / 録画された講義を / 繰り返し",
                 answer: "Students far from campus can save travel time, and they can review recorded lectures repeatedly.",
                 pieces: ["Students far from campus", "can save travel time,", "and they can", "review recorded lectures", "repeatedly."]
             },
             {
                 sentenceJa: "しかし技術的な問題が授業を妨げ、対面交流の減少で孤立を感じることがある。",
+                literalJa: "しかしながら / 技術的な問題が / 妨げるかもしれない / 授業を / そして / 生徒たちは / 孤立を感じるかもしれない / ～のために / より少ない対面の交流の",
                 answer: "However, technical problems may disrupt classes, and students may feel isolated due to fewer face-to-face interactions.",
                 pieces: ["However,", "technical problems", "may disrupt classes,", "and students may feel", "isolated due to", "fewer face-to-face interactions."]
             }
