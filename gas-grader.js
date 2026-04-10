@@ -218,12 +218,10 @@ function doGet(e) {
 function fetchGeminiWithRetry(model, payload) {
     const primaryKey = PropertiesService.getScriptProperties().getProperty('GEMINI_API_KEY');
     
-    // システム全体で共有する代替キー（エラー・制限回避用）
-    const fallbackKeys = [
-        "AIzaSyBivbg2MPWQuvYHjGa-YbN1j4pKE_oBDQ0",
-        "AIzaSyACWL0N1UXicvyjt0i2GDBzt1e8vtGQUBY",
-        "AIzaSyBbIgJsbT2xVFSBrtYG5kuRjGgBje-B00g"
-    ];
+    // 代替キーもスクリプトプロパティから取得（ソースコードに直書きしない）
+    const key2 = PropertiesService.getScriptProperties().getProperty('GEMINI_API_KEY_2') || '';
+    const key3 = PropertiesService.getScriptProperties().getProperty('GEMINI_API_KEY_3') || '';
+    const fallbackKeys = [key2, key3].filter(k => k.length > 0);
     
     let keysToTry = [];
     if (primaryKey) keysToTry.push(primaryKey);

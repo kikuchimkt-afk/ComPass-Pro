@@ -54,6 +54,27 @@ const EMAIL_THEMES = [
             { ja: "滞在時間", jaText: "私はそこに2時間滞在しました", text: "I stayed there for two hours", chunks: ["I stayed there", "for two hours"] },
             { ja: "感想", jaText: "私はその美術館を本当に楽しみました", text: "I really enjoyed the art museum", chunks: ["I really enjoyed", "the art museum"] }
         ],
+        // Direct chunks for chunk exercise (3級は回答文の並べ替え)
+        chunks: [
+            {
+                sentenceJa: "私はそこで約30枚の絵を見ました。",
+                literalJa: "私は見ました / 約30枚の絵を / そこで",
+                answer: "I saw about thirty pictures there.",
+                pieces: ["I saw", "about thirty pictures", "there."]
+            },
+            {
+                sentenceJa: "私はそこに2時間滞在しました。",
+                literalJa: "私はそこに滞在しました / 2時間",
+                answer: "I stayed there for two hours.",
+                pieces: ["I stayed there", "for two hours."]
+            },
+            {
+                sentenceJa: "私はその美術館を本当に楽しみました。",
+                literalJa: "私は本当に楽しみました / その美術館を",
+                answer: "I really enjoyed the art museum.",
+                pieces: ["I really enjoyed", "the art museum."]
+            }
+        ],
         modelAnswer: "Hi, James!\nThank you for your e-mail. I saw about thirty pictures there. I stayed there for two hours. I really enjoyed the art museum.\nBest wishes,",
         modelAnswerJa: "ジェームズへ\nメールありがとう。私はそこで約30枚の絵を見ました。私はそこに2時間滞在しました。私はその美術館を本当に楽しみました。\n敬具"
     }

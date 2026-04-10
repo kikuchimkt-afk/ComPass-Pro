@@ -24,6 +24,7 @@
 
     // ===== HELPERS =====
     function getTheme() { return EMAIL_THEMES.find(t => t.id === currentThemeId) || EMAIL_THEMES[0]; }
+    function getSenderName(theme) { return (theme && theme.senderName) || 'Alex'; }
     function countWords(text) { return text.trim().split(/\s+/).filter(w => w.length > 0).length; }
     function $(id) { return document.getElementById(id); }
     function escapeHtml(text) { return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
@@ -217,16 +218,16 @@ body { font-family: 'Times New Roman', 'Noto Serif JP', serif; font-size: 11pt; 
     </div>
 
     <div class="instructions">
-        <p>Read the e-mail below from Alex, your friend in another country.</p>
-        <p>Write a reply to Alex's e-mail.</p>
+        <p>Read the e-mail below from ${getSenderName(theme)}, your friend in another country.</p>
+        <p>Write a reply to ${getSenderName(theme)}'s e-mail.</p>
         <p>Include two of the following: a question, your opinion and a reason for your opinion.</p>
         <p>Suggested length: ${minWords}–${maxWords} words</p>
         <p>Write your reply in the space provided on the answer sheet. <span class="underline">Any writing outside the space will not be graded.</span></p>
     </div>
 
-    <div class="passage-label">E-mail from Alex</div>
+    <div class="passage-label">E-mail from ${getSenderName(theme)}</div>
     <div class="email-box">
-        <div class="email-from">From: Alex</div>
+        <div class="email-from">From: ${getSenderName(theme)}</div>
         ${emailText}
     </div>
 
@@ -245,7 +246,7 @@ body { font-family: 'Times New Roman', 'Noto Serif JP', serif; font-size: 11pt; 
     </div>
 
     <div class="reply-template">
-        <span>Hi, Alex!</span><br>
+        <span>Hi, ${getSenderName(theme)}!</span><br>
         Thank you for your e-mail.
     </div>
 
@@ -336,7 +337,7 @@ body { font-family: 'Times New Roman', 'Noto Serif JP', serif; font-size: 11pt; 
             <div class="email-card">
                 <div class="email-header">
                     <span class="material-symbols-rounded" style="color:var(--color-intro)">mail</span>
-                    <span>From: Alex</span>
+                    <span>From: ${getSenderName(theme)}</span>
                 </div>
                 <div class="email-body">${emailHtml}</div>
                 <div class="email-ja ${showJa ? '' : 'hidden'}" style="margin-top:12px;padding:12px;background:rgba(var(--accent-rgb),0.05);border-radius:8px;font-size:0.82rem;line-height:1.7;color:var(--text-secondary)">${theme.alexEmailJa}</div>
@@ -350,7 +351,7 @@ body { font-family: 'Times New Roman', 'Noto Serif JP', serif; font-size: 11pt; 
             <div class="template-steps">
                 <div class="template-step" style="border-left-color:#22c55e">
                     <div class="template-step-label" style="color:#22c55e">1. 挨拶</div>
-                    <div class="template-step-text">Hi, Alex!</div>
+                    <div class="template-step-text">Hi, ${getSenderName(theme)}!</div>
                 </div>
                 <div class="template-step" style="border-left-color:#94a3b8">
                     <div class="template-step-label" style="color:#94a3b8">2. 書き出し（定型文）</div>
@@ -464,7 +465,8 @@ body { font-family: 'Times New Roman', 'Noto Serif JP', serif; font-size: 11pt; 
         const container = $('emailPreview');
         const parts = [];
 
-        parts.push('<span class="preview-fixed">Hi, Alex!</span>');
+        const sn = getSenderName(theme);
+        parts.push(`<span class="preview-fixed">Hi, ${sn}!</span>`);
         parts.push('<span class="preview-fixed">Thank you for your e-mail.</span>');
 
         if (selectedOpinion) {
@@ -499,7 +501,7 @@ body { font-family: 'Times New Roman', 'Noto Serif JP', serif; font-size: 11pt; 
 
         // 組み立てた文をカウント
         const fullText = [
-            'Hi, Alex!',
+            `Hi, ${getSenderName(theme)}!`,
             'Thank you for your e-mail.',
             selectedOpinion ? `I think ${theme.opinions[selectedOpinion].text}.` : '',
             selectedReason !== null ? `${(selectedOpinion === 'disagree' ? theme.negativeReasons : theme.reasons)[selectedReason].text}.` : '',
@@ -521,7 +523,7 @@ body { font-family: 'Times New Roman', 'Noto Serif JP', serif; font-size: 11pt; 
         // Copy to Step 2 writing area if all parts are selected
         if (selectedOpinion && selectedReason !== null && selectedQ1 !== null && selectedQ2 !== null) {
             const reasonItems = selectedOpinion === 'disagree' ? theme.negativeReasons : theme.reasons;
-            const built = `Hi, Alex!\nThank you for your e-mail. I think ${theme.opinions[selectedOpinion].text}. ${reasonItems[selectedReason].text}. I have two questions about ${theme.underlinedTopic}. ${theme.questions[selectedQ1].text}? ${theme.questions[selectedQ2].text}?\nBest wishes,`;
+            const built = `Hi, ${getSenderName(theme)}!\nThank you for your e-mail. I think ${theme.opinions[selectedOpinion].text}. ${reasonItems[selectedReason].text}. I have two questions about ${theme.underlinedTopic}. ${theme.questions[selectedQ1].text}? ${theme.questions[selectedQ2].text}?\nBest wishes,`;
             if ($('step2Writing') && !$('step2Writing').value) {
                 $('step2Writing').value = built;
                 updateWordCounter('step2');
@@ -548,7 +550,7 @@ body { font-family: 'Times New Roman', 'Noto Serif JP', serif; font-size: 11pt; 
             <div class="email-card" style="font-size:0.88rem">
                 <div class="email-header">
                     <span class="material-symbols-rounded" style="color:var(--color-intro)">mail</span>
-                    <span>From: Alex</span>
+                    <span>From: ${getSenderName(theme)}</span>
                 </div>
                 <div class="email-body">${emailHtml}</div>
             </div>
@@ -559,29 +561,39 @@ body { font-family: 'Times New Roman', 'Noto Serif JP', serif; font-size: 11pt; 
         const container = $('step2Chunks');
         if (!container) return;
 
-        // Build chunk exercises from opinions and questions
+        // Build chunk exercises
         const exercises = [];
-        const agreeOp = theme.opinions.agree;
-        exercises.push({
-            sentenceJa: agreeOp.jaText,
-            answer: `I think ${agreeOp.text}.`,
-            pieces: ['I think', ...agreeOp.chunks, '.']
-        });
-        if (theme.reasons.length > 0) {
-            const r = theme.reasons[0];
+        if (theme.chunks && theme.chunks.length > 0) {
+            // Direct chunks array (3級 etc.) — use as-is
+            theme.chunks.forEach(c => exercises.push({
+                sentenceJa: c.sentenceJa,
+                answer: c.answer,
+                pieces: [...c.pieces]
+            }));
+        } else {
+            // Auto-generate from opinions/reasons/questions (準2級)
+            const agreeOp = theme.opinions.agree;
             exercises.push({
-                sentenceJa: r.jaText,
-                answer: `${r.text}.`,
-                pieces: [...r.chunks, '.']
+                sentenceJa: agreeOp.jaText,
+                answer: `I think ${agreeOp.text}.`,
+                pieces: ['I think', ...agreeOp.chunks, '.']
             });
-        }
-        if (theme.questions.length > 0) {
-            const q = theme.questions[0];
-            exercises.push({
-                sentenceJa: q.jaText,
-                answer: `${q.text}?`,
-                pieces: [...q.chunks, '?']
-            });
+            if (theme.reasons.length > 0) {
+                const r = theme.reasons[0];
+                exercises.push({
+                    sentenceJa: r.jaText,
+                    answer: `${r.text}.`,
+                    pieces: [...r.chunks, '.']
+                });
+            }
+            if (theme.questions.length > 0) {
+                const q = theme.questions[0];
+                exercises.push({
+                    sentenceJa: q.jaText,
+                    answer: `${q.text}?`,
+                    pieces: [...q.chunks, '?']
+                });
+            }
         }
 
         let currentIdx = 0;
@@ -736,7 +748,7 @@ body { font-family: 'Times New Roman', 'Noto Serif JP', serif; font-size: 11pt; 
             <div class="email-card" style="font-size:0.88rem">
                 <div class="email-header">
                     <span class="material-symbols-rounded" style="color:var(--color-intro)">mail</span>
-                    <span>From: Alex</span>
+                    <span>From: ${getSenderName(theme)}</span>
                 </div>
                 <div class="email-body">${emailHtml}</div>
             </div>
