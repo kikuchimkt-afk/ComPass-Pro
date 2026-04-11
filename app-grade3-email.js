@@ -33,7 +33,7 @@
 
     // GAS URL（AI採点）
     const GAS_URL_KEY = 'writepass-gas-url';
-    const getGasUrl = () => localStorage.getItem(GAS_URL_KEY) || '';
+    const getGasUrl = () => localStorage.getItem(GAS_URL_KEY) || 'https://script.google.com/macros/s/AKfycbxRyQIL6e1Tdg3aVWg10BoY5KGafKm1SYci8Voouxg9GEn7wnOGT0NUgxNr0sBUjXY0Tw/exec';
     const setGasUrl = (url) => localStorage.setItem(GAS_URL_KEY, url);
 
     const getTheme = () => EMAIL_THEMES[currentThemeIndex];
