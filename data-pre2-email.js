@@ -53,6 +53,18 @@ const EMAIL_THEMES = [
             { ja: "人数について", jaText: "何人乗れますか", text: "How many people can ride it", chunks: ["How many people", "can ride it"] },
             { ja: "持ち物について", jaText: "何を持っていくべきですか", text: "What should we bring with us", chunks: ["What", "should we bring", "with us"] }
         ],
+        transDrillSentences: [
+            { sentenceJa: "将来もっと多くの人が野鳥観察を楽しむと思います。", literalJa: "私は思います / もっと多くの人が / 楽しむと / 野鳥観察を / 将来", answer: "I think more people will enjoy bird watching in the future." },
+            { sentenceJa: "自然を見るのはリラックスできて楽しいです。", literalJa: "それは〜です / リラックスできて楽しい / 見ること / 自然を", answer: "It is relaxing and fun to watch nature." },
+            { sentenceJa: "借りるのにいくらかかりますか？", literalJa: "いくら / かかりますか / 借りるのに / それを", answer: "How much does it cost to rent it?" },
+            { sentenceJa: "どのくらいの時間使えますか？", literalJa: "どのくらい / 使えますか / それを", answer: "How long can we use it?" }
+        ],
+        guidedHints: [
+            { label: "意見", hintJa: "野鳥観察が将来もっと人気になるか、自分の意見を述べましょう。", modelSentence: "I think more people will enjoy bird watching in the future." },
+            { label: "理由", hintJa: "その意見の理由を1文で述べましょう。", modelSentence: "It is relaxing and fun to watch nature." },
+            { label: "質問1", hintJa: "ボートについて質問しましょう（料金、予約など）。", modelSentence: "How much does it cost to rent it?" },
+            { label: "質問2", hintJa: "ボートについてもう1つ質問しましょう（時間、場所など）。", modelSentence: "How long can we use it?" }
+        ],
         modelAnswer: "Hi, Alex!\nThank you for your e-mail. I think more people will enjoy bird watching in the future. It is relaxing and fun to watch nature. I have two questions about the boat. How much does it cost to rent it? How long can we use it?\nBest wishes,",
         modelAnswerJa: "アレックスへ\nメールありがとう。将来もっと多くの人が野鳥観察を楽しむと思います。自然を見るのはリラックスできて楽しいからです。ボートについて2つ質問があります。借りるのにいくらかかりますか？どのくらいの時間使えますか？\n敬具"
     },
@@ -95,6 +107,18 @@ const EMAIL_THEMES = [
             { ja: "期間について", jaText: "ツアーは何日間でしたか", text: "How many days was the tour", chunks: ["How many days", "was the tour"] },
             { ja: "場所について", jaText: "ツアー中にどんな場所を訪れましたか", text: "What places did you visit during the tour", chunks: ["What places", "did you visit", "during the tour"] },
             { ja: "食事について", jaText: "そこでどんな食べ物を食べましたか", text: "What kind of food did you eat there", chunks: ["What kind of food", "did you eat", "there"] }
+        ],
+        transDrillSentences: [
+            { sentenceJa: "長い昼休みは日本で人気になると思います。", literalJa: "私は思います / 長い昼休みは / 人気になると / 日本で", answer: "I think a long lunch break will become popular in Japan." },
+            { sentenceJa: "昼食後に休息を取ることは体に良いです。", literalJa: "休息を取ること / 昼食後に / は良いです / 体に", answer: "Taking a rest after lunch is good for your body." },
+            { sentenceJa: "ツアーを事前に予約する必要がありましたか？", literalJa: "〜する必要がありましたか / 予約する / ツアーを / 事前に", answer: "Did you need to book the tour in advance?" },
+            { sentenceJa: "ツアーの費用は1人いくらでしたか？", literalJa: "いくら / でしたか / 合計費用は / ツアーの / 1人あたり", answer: "How much was the total cost of the tour per person?" }
+        ],
+        guidedHints: [
+            { label: "意見", hintJa: "長い昼休みが日本で人気になるか、自分の意見を述べましょう。", modelSentence: "I think a long lunch break will become popular in Japan." },
+            { label: "理由", hintJa: "その意見の理由を1文で述べましょう。", modelSentence: "Taking a rest after lunch is good for your body." },
+            { label: "質問1", hintJa: "ツアーについて質問しましょう（予約、料金など）。", modelSentence: "Did you need to book the tour in advance?" },
+            { label: "質問2", hintJa: "ツアーについてもう1つ質問しましょう（費用、期間など）。", modelSentence: "How much was the total cost of the tour per person?" }
         ],
         modelAnswer: "Hi, Alex!\nThank you for your e-mail. I think a long lunch break will become popular in Japan. Taking a rest after lunch is good for your body. I have two questions about the tour. Did you need to book the tour in advance? How much was the total cost of the tour per person?\nBest wishes,",
         modelAnswerJa: "アレックスへ\nメールありがとう。長い昼休みは日本で人気になると思います。昼食後に休息を取ることは体に良いからです。ツアーについて2つ質問があります。ツアーを事前に予約する必要がありましたか？ツアーの費用はいくらでしたか？\n敬具"
@@ -139,6 +163,18 @@ const EMAIL_THEMES = [
             { ja: "場所について", jaText: "駅からどうやって行けますか", text: "How can I get there from the station", chunks: ["How can I", "get there", "from the station"] },
             { ja: "利用者について", jaText: "高校生もスポーツセンターを使えますか", text: "Can high school students use the sports center", chunks: ["Can high school students", "use", "the sports center"] }
         ],
+        transDrillSentences: [
+            { sentenceJa: "将来、温水プールの数は増えると思います。", literalJa: "私は思います / 温水プールの数は / 増えると / 将来", answer: "I think the number of warm water pools will increase in the future." },
+            { sentenceJa: "水泳はあらゆる年齢の人にとって楽しい活動です。", literalJa: "水泳は / 楽しい活動です / 人々にとって / あらゆる年齢の", answer: "Swimming is a fun activity for people of all ages." },
+            { sentenceJa: "プールを使うのにいくらかかりますか？", literalJa: "いくら / かかりますか / 使うのに / プールを", answer: "How much does it cost to use the pool?" },
+            { sentenceJa: "何時に開いて何時に閉まりますか？", literalJa: "何時に / 開きますか / そして / 閉まりますか", answer: "What time does it open and close?" }
+        ],
+        guidedHints: [
+            { label: "意見", hintJa: "温水プールが将来増えるか、自分の意見を述べましょう。", modelSentence: "I think the number of warm water pools will increase in the future." },
+            { label: "理由", hintJa: "その意見の理由を1文で述べましょう。", modelSentence: "Swimming is a fun activity for people of all ages." },
+            { label: "質問1", hintJa: "スポーツセンターについて質問しましょう（料金、予約など）。", modelSentence: "How much does it cost to use the pool?" },
+            { label: "質問2", hintJa: "スポーツセンターについてもう1つ質問しましょう（時間、場所など）。", modelSentence: "What time does it open and close?" }
+        ],
         modelAnswer: "Hi, Alex!\nThank you for your e-mail. I think the number of warm water pools will increase in the future. Swimming is a fun activity for people of all ages. I have two questions about the sports center. How much does it cost to use the pool? What time does it open and close?\nBest wishes,",
         modelAnswerJa: "アレックスへ\nメールありがとう。将来温水プールの数は増えると思います。水泳はあらゆる年齢の人にとって楽しい活動だからです。スポーツセンターについて2つ質問があります。プールを使うのにいくらかかりますか？何時に開いて何時に閉まりますか？\n敬具"
     },
@@ -180,6 +216,18 @@ const EMAIL_THEMES = [
             { ja: "時間について", jaText: "ラグビーの試合はどのくらい続きますか", text: "How long does a rugby game usually last", chunks: ["How long", "does a rugby game", "usually last"] },
             { ja: "座席について", jaText: "スタジアムには何席ありますか", text: "How many seats does the stadium have", chunks: ["How many seats", "does the stadium", "have"] },
             { ja: "設備について", jaText: "スタジアムの中にレストランはありますか", text: "Are there any restaurants inside the stadium", chunks: ["Are there", "any restaurants", "inside the stadium"] }
+        ],
+        transDrillSentences: [
+            { sentenceJa: "もっと多くの人がラグビーを見ると思います。", literalJa: "私は思います / もっと多くの人が / 見ると / ラグビーを", answer: "I think more people will watch rugby." },
+            { sentenceJa: "ラグビーの試合は家族と見てエキサイティングで楽しいです。", literalJa: "ラグビーの試合は / エキサイティングで楽しいです / 見て / 家族と", answer: "Rugby games are exciting and fun to watch with family." },
+            { sentenceJa: "チケットはいくらですか？", literalJa: "いくら / しますか / チケットは", answer: "How much do the tickets cost?" },
+            { sentenceJa: "スタジアムには何席ありますか？", literalJa: "何席 / ありますか / スタジアムには", answer: "How many seats does the stadium have?" }
+        ],
+        guidedHints: [
+            { label: "意見", hintJa: "ラグビーを見る人が増えるか、自分の意見を述べましょう。", modelSentence: "I think more people will watch rugby." },
+            { label: "理由", hintJa: "その意見の理由を1文で述べましょう。", modelSentence: "Rugby games are exciting and fun to watch with family." },
+            { label: "質問1", hintJa: "スタジアムについて質問しましょう（チケット、座席数など）。", modelSentence: "How much do the tickets cost?" },
+            { label: "質問2", hintJa: "スタジアムについてもう1つ質問しましょう（設備、時間など）。", modelSentence: "How many seats does the stadium have?" }
         ],
         modelAnswer: "Hi, Alex!\nThank you for your e-mail. I think more people will watch rugby. Rugby games are exciting and fun to watch with family. I have two questions about the new stadium. How much do the tickets cost? How many seats does the stadium have?\nBest wishes,",
         modelAnswerJa: "アレックスへ\nメールありがとう。もっと多くの人がラグビーを見ると思います。ラグビーの試合は家族と見てエキサイティングで楽しいからです。新しいスタジアムについて2つ質問があります。チケットはいくらですか？スタジアムには何席ありますか？\n敬具"
@@ -224,6 +272,18 @@ const EMAIL_THEMES = [
             { ja: "場所について", jaText: "図書館はどこにありますか", text: "Where is the library located", chunks: ["Where is", "the library", "located"] },
             { ja: "冊数について", jaText: "一度に何冊借りられますか", text: "How many books can we borrow at once", chunks: ["How many books", "can we borrow", "at once"] }
         ],
+        transDrillSentences: [
+            { sentenceJa: "そのようなカフェは将来人気になると思います。", literalJa: "私は思います / そのようなカフェは / 人気になると / 将来", answer: "I think such cafés will become popular in the future." },
+            { sentenceJa: "図書館は静かで快適な勉強やリラックスの場所です。", literalJa: "図書館は / 静かで快適な場所です / 勉強やリラックスのための", answer: "Libraries are quiet and comfortable places to study or relax." },
+            { sentenceJa: "開館時間は何時ですか？", literalJa: "何ですか / 開館時間は", answer: "What are the opening hours?" },
+            { sentenceJa: "一度に何冊借りられますか？", literalJa: "何冊 / 借りられますか / 一度に", answer: "How many books can we borrow at once?" }
+        ],
+        guidedHints: [
+            { label: "意見", hintJa: "図書館のカフェが将来人気になるか、自分の意見を述べましょう。", modelSentence: "I think such cafés will become popular in the future." },
+            { label: "理由", hintJa: "その意見の理由を1文で述べましょう。", modelSentence: "Libraries are quiet and comfortable places to study or relax." },
+            { label: "質問1", hintJa: "図書館について質問しましょう（時間、利用方法など）。", modelSentence: "What are the opening hours?" },
+            { label: "質問2", hintJa: "図書館についてもう1つ質問しましょう（冊数、場所など）。", modelSentence: "How many books can we borrow at once?" }
+        ],
         modelAnswer: "Hi, Alex!\nThank you for your e-mail. I think such cafés will become popular in the future. Libraries are quiet and comfortable places to study or relax. I have two questions about the library. What are the opening hours? How many books can we borrow at once?\nBest wishes,",
         modelAnswerJa: "アレックスへ\nメールありがとう。そのようなカフェは将来人気になると思います。図書館は静かで快適な勉強やリラックスの場所だからです。図書館について2つ質問があります。開館時間は何時ですか？一度に何冊借りられますか？\n敬具"
     },
@@ -266,6 +326,18 @@ const EMAIL_THEMES = [
             { ja: "お店について", jaText: "近くにお気に入りのお店はありますか", text: "Do you have a favorite shop near your home", chunks: ["Do you have", "a favorite shop", "near your home"] },
             { ja: "学校について", jaText: "近くに学校はありますか", text: "Are there any schools near your home", chunks: ["Are there", "any schools", "near your home"] },
             { ja: "環境について", jaText: "その街は住みやすいですか", text: "Is the city a nice place to live", chunks: ["Is the city", "a nice place", "to live"] }
+        ],
+        transDrillSentences: [
+            { sentenceJa: "もっと多くの都市がそのようなバスサービスを提供すると思います。", literalJa: "私は思います / もっと多くの都市が / 提供すると / そのようなバスサービスを / 将来", answer: "I think more cities will provide such a bus service in the future." },
+            { sentenceJa: "高齢者は自分で運転できないことが多いので、無料バスは役に立ちます。", literalJa: "高齢者は / しばしば運転できない / 自分で / だから / 無料バスは / 役に立つ", answer: "Elderly people often cannot drive by themselves, so free buses are helpful." },
+            { sentenceJa: "その街にはどのくらいの人が住んでいますか？", literalJa: "何人が / 住んでいますか / その街に", answer: "How many people live in the city?" },
+            { sentenceJa: "その街は住みやすいですか？", literalJa: "〜ですか / その街は / 良い場所 / 住むための", answer: "Is the city a nice place to live?" }
+        ],
+        guidedHints: [
+            { label: "意見", hintJa: "高齢者バスが将来もっと多くの都市で提供されるか、自分の意見を述べましょう。", modelSentence: "I think more cities will provide such a bus service in the future." },
+            { label: "理由", hintJa: "その意見の理由を1文で述べましょう。", modelSentence: "Elderly people often cannot drive by themselves, so free buses are helpful." },
+            { label: "質問1", hintJa: "街について質問しましょう（人口、交通など）。", modelSentence: "How many people live in the city?" },
+            { label: "質問2", hintJa: "街についてもう1つ質問しましょう（環境、施設など）。", modelSentence: "Is the city a nice place to live?" }
         ],
         modelAnswer: "Hi, Alex!\nThank you for your e-mail. I think more cities will provide such a bus service in the future. Elderly people often cannot drive by themselves, so free buses are helpful. I have two questions about the city. How many people live in the city? Is the city a nice place to live?\nBest wishes,",
         modelAnswerJa: "アレックスへ\nメールありがとう。もっと多くの都市がそのようなバスサービスを提供すると思います。高齢者は自分で運転できないことが多いので、無料バスは役に立つからです。街について2つ質問があります。その街にはどのくらいの人が住んでいますか？その街は住みやすいですか？\n敬具"

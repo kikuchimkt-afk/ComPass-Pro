@@ -21,6 +21,8 @@
     let showJa = false;
     let isGrading = false;
     let lastGradeData = {};
+    let transDrillIndex = 0;
+    let transDrillChecked = false;
 
     // ===== HELPERS =====
     function getTheme() { return EMAIL_THEMES.find(t => t.id === currentThemeId) || EMAIL_THEMES[0]; }
@@ -298,6 +300,8 @@ body { font-family: 'Times New Roman', 'Noto Serif JP', serif; font-size: 11pt; 
         selectedReason = null;
         selectedQ1 = null;
         selectedQ2 = null;
+        transDrillIndex = 0;
+        transDrillChecked = false;
         if ($('step2Writing')) $('step2Writing').value = '';
         if ($('step3Writing')) $('step3Writing').value = '';
         if ($('step2ModelAnswer')) $('step2ModelAnswer').style.display = 'none';
@@ -536,6 +540,8 @@ body { font-family: 'Times New Roman', 'Noto Serif JP', serif; font-size: 11pt; 
         const theme = getTheme();
         renderEmailDisplay2(theme);
         renderChunkExercise(theme);
+        renderTransDrill(theme);
+        renderGuidedHints(theme);
         updateWordCounter('step2');
     }
 
@@ -728,6 +734,180 @@ body { font-family: 'Times New Roman', 'Noto Serif JP', serif; font-size: 11pt; 
         }
 
         renderChunk(0);
+    }
+
+    // ===== 日→英 変換ドリル =====
+    function renderTransDrill(theme) {
+        const sentences = theme.transDrillSentences;
+        if (!sentences || sentences.length === 0) return;
+        const container = $('transDrill');
+        if (!container) return;
+
+        const pFill = $('transDrillProgress');
+        const pText = $('transDrillProgressText');
+        if (pFill) pFill.style.width = `${(Math.min(transDrillIndex + 1, sentences.length) / sentences.length) * 100}%`;
+        if (pText) pText.textContent = `${Math.min(transDrillIndex + 1, sentences.length)} / ${sentences.length}`;
+
+        if (transDrillIndex >= sentences.length) {
+            container.innerHTML = `
+                <div class="result-banner success" style="margin-top:8px">
+                    <span class="material-symbols-rounded">check_circle</span>
+                    全${sentences.length}文 完了！🎉
+                </div>`;
+            return;
+        }
+
+        const s = sentences[transDrillIndex];
+        transDrillChecked = false;
+        const hintWords = s.literalJa || '';
+
+        container.innerHTML = `
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+                <span style="background:var(--accent-primary);color:#fff;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.72rem;font-weight:700">${transDrillIndex + 1}</span>
+                <span style="font-size:0.82rem;color:var(--text-secondary)">${sentences.length}文中 ${transDrillIndex + 1}文目</span>
+            </div>
+            <div style="font-size:0.78rem;color:var(--text-secondary);margin-bottom:2px">日本語</div>
+            <div style="font-size:1rem;font-weight:700;margin-bottom:8px;border-left:3px solid var(--accent-primary);padding-left:10px">${escapeHtml(s.sentenceJa)}</div>
+            <button class="btn btn-outline" id="transDrillHintBtn" style="margin-bottom:8px;color:var(--warning)">
+                <span class="material-symbols-rounded" style="font-size:16px">lightbulb</span> ヒントを見る（英語の語順）
+            </button>
+            <textarea class="writing-area" id="transDrillInput" rows="2"
+                placeholder="英語で書いてみましょう..."></textarea>
+            <div class="btn-group" style="margin-top:8px">
+                <button class="btn btn-primary" id="transDrillCheck">
+                    <span class="material-symbols-rounded">check</span> 確認
+                </button>
+            </div>
+            <div id="transDrillResult"></div>
+        `;
+
+        $('transDrillHintBtn').addEventListener('click', () => {
+            $('transDrillHintBtn').innerHTML = `<span class="material-symbols-rounded" style="font-size:16px">lightbulb</span> ${escapeHtml(hintWords)}`;
+            $('transDrillHintBtn').disabled = true;
+        });
+
+        $('transDrillCheck').addEventListener('click', async () => {
+            if (transDrillChecked) return;
+            const userAnswer = $('transDrillInput').value.trim();
+            if (!userAnswer) return;
+            transDrillChecked = true;
+
+            const checkBtn = $('transDrillCheck');
+            checkBtn.disabled = true;
+            checkBtn.innerHTML = '<span class="material-symbols-rounded">hourglass_top</span> 採点中...';
+
+            const resultDiv = $('transDrillResult');
+
+            // Try AI grading
+            if (GAS_URL) {
+                try {
+                    const response = await fetch(GAS_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                        body: JSON.stringify({
+                            action: 'gradeSentence',
+                            sentenceJa: s.sentenceJa,
+                            modelAnswer: s.answer,
+                            studentAnswer: userAnswer,
+                            gradeLabel: WRITEPASS_CONFIG.gradeLabel || '準2級'
+                        })
+                    });
+                    const data = await response.json();
+                    if (data.success && data.result) {
+                        const r = data.result;
+                        const scoreColor = r.totalScore >= 80 ? '#22c55e' : r.totalScore >= 50 ? '#f59e0b' : '#ef4444';
+                        resultDiv.innerHTML = `
+                            <div style="margin-top:12px;padding:12px;background:rgba(${scoreColor === '#22c55e' ? '34,197,94' : scoreColor === '#f59e0b' ? '245,158,11' : '239,68,68'},0.08);border:1px solid ${scoreColor};border-radius:8px">
+                                <div style="font-size:1.1rem;font-weight:700;color:${scoreColor};margin-bottom:6px">
+                                    スコア: ${r.totalScore} / 100
+                                </div>
+                                ${r.teacherFeedback ? `<div style="font-size:0.85rem;margin-bottom:6px">💬 ${escapeHtml(r.teacherFeedback)}</div>` : ''}
+                                ${r.corrected ? `<div style="font-size:0.85rem;margin-bottom:4px">✏️ <strong>修正文:</strong> <span style="color:#22c55e">${escapeHtml(r.corrected)}</span></div>` : ''}
+                                ${r.natural ? `<div style="font-size:0.85rem;margin-bottom:4px">🌟 <strong>より自然な表現:</strong> ${escapeHtml(r.natural)}</div>` : ''}
+                            </div>
+                            <div style="margin-top:8px;padding:8px 12px;background:var(--bg-secondary);border-radius:6px;border:1px solid var(--border)">
+                                <div style="font-size:0.75rem;font-weight:600;color:var(--text-secondary);margin-bottom:4px">模範解答</div>
+                                <div style="font-size:0.92rem;color:#22c55e;font-weight:600">${escapeHtml(s.answer)}</div>
+                            </div>
+                            <div class="btn-group" style="margin-top:10px">
+                                <button class="btn btn-primary" id="transDrillNext">
+                                    <span class="material-symbols-rounded">arrow_forward</span>
+                                    ${transDrillIndex + 1 < sentences.length ? '次の文へ' : '完了'}
+                                </button>
+                            </div>
+                        `;
+                        $('transDrillInput').readOnly = true;
+                        $('transDrillNext').addEventListener('click', () => {
+                            transDrillIndex++;
+                            renderTransDrill(getTheme());
+                        });
+                        return;
+                    }
+                } catch (e) {
+                    console.warn('AI grading failed, falling back to local:', e);
+                }
+            }
+
+            // Fallback: local comparison
+            const normalize = t => t.toLowerCase().replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, ' ').trim();
+            const match = normalize(userAnswer) === normalize(s.answer);
+            const similarity = (() => {
+                const a = normalize(userAnswer).split(' ');
+                const b = normalize(s.answer).split(' ');
+                let hits = 0;
+                b.forEach(w => { if (a.includes(w)) hits++; });
+                return Math.round((hits / Math.max(b.length, 1)) * 100);
+            })();
+            const simColor = match ? '#22c55e' : similarity >= 60 ? '#f59e0b' : '#ef4444';
+            resultDiv.innerHTML = `
+                <div class="result-banner ${match ? 'success' : 'error'}" style="margin-top:8px">
+                    <span class="material-symbols-rounded">${match ? 'check_circle' : 'cancel'}</span>
+                    一致率: ${similarity}%
+                </div>
+                <div style="margin-top:8px;padding:8px 12px;background:var(--bg-secondary);border-radius:6px;border:1px solid var(--border)">
+                    <div style="font-size:0.75rem;font-weight:600;color:var(--text-secondary);margin-bottom:4px">模範解答</div>
+                    <div style="font-size:0.92rem;color:#22c55e;font-weight:600">${escapeHtml(s.answer)}</div>
+                </div>
+                <div class="btn-group" style="margin-top:10px">
+                    <button class="btn btn-primary" id="transDrillNext">
+                        <span class="material-symbols-rounded">arrow_forward</span>
+                        ${transDrillIndex + 1 < sentences.length ? '次の文へ' : '完了'}
+                    </button>
+                </div>
+            `;
+            $('transDrillInput').readOnly = true;
+            $('transDrillNext').addEventListener('click', () => {
+                transDrillIndex++;
+                renderTransDrill(getTheme());
+            });
+        });
+
+        $('transDrillInput').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                $('transDrillCheck').click();
+            }
+        });
+    }
+
+    // ===== ガイド付きヒント描画 =====
+    function renderGuidedHints(theme) {
+        const container = $('step2Hints');
+        if (!container) return;
+        const hints = theme.guidedHints;
+        if (!hints || hints.length === 0) return;
+
+        const colors = ['#6366f1', '#f59e0b', '#ef4444', '#ec4899'];
+        container.innerHTML = hints.map((h, i) => `
+            <div style="padding:8px 12px;border-left:3px solid ${colors[i % colors.length]};border-radius:0 6px 6px 0;background:rgba(255,255,255,0.02);margin-bottom:6px">
+                <div style="font-size:0.72rem;font-weight:700;color:${colors[i % colors.length]};margin-bottom:2px">${h.label}</div>
+                <div style="font-size:0.82rem;color:var(--text-secondary);margin-bottom:4px">${escapeHtml(h.hintJa)}</div>
+                <details style="font-size:0.82rem">
+                    <summary style="cursor:pointer;color:var(--accent-primary)">模範文を見る</summary>
+                    <div style="margin-top:4px;color:#22c55e;font-weight:600">${escapeHtml(h.modelSentence)}</div>
+                </details>
+            </div>
+        `).join('');
     }
 
     // ===== STEP 3: 本番 =====

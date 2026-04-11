@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ja" data-theme="dark">
 
 <head>
@@ -295,8 +295,8 @@
         <div class="step-pane" id="step2">
             <div class="content-area">
                 <div class="section-header">
-                    <h2>🔧 Step 2：チャンクで練習</h2>
-                    <p class="section-desc">英文の語順をチャンク並べ替えで練習し、その後自分で書いてみましょう。</p>
+                    <h2>🔄 Step 2：練習</h2>
+                    <p class="section-desc">チャンク並べ替え → 日英変換 → ガイド付き記述の順に段階的に力をつけます。</p>
                 </div>
 
                 <!-- メール表示 -->
@@ -323,12 +323,30 @@
                     <div id="step2Chunks"></div>
                 </div>
 
-                <!-- 自由記述 -->
+                <!-- 日→英 変換ドリル -->
+                <div class="card">
+                    <div class="card-title">
+                        <span class="material-symbols-rounded">translate</span>
+                        日→英 変換ドリル
+                    </div>
+                    <p class="section-desc" style="margin-bottom:12px">日本語を見て、英語で書いてみましょう。模範解答と比較して表現力を磨きます。</p>
+                    <div class="progress-wrap">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="transDrillProgress"></div>
+                        </div>
+                        <span class="progress-text" id="transDrillProgressText">1 / 4</span>
+                    </div>
+                    <div id="transDrill"></div>
+                </div>
+
+                <!-- ガイド付き自由記述 -->
                 <div class="card">
                     <div class="card-title">
                         <span class="material-symbols-rounded">draw</span>
-                        自分で書いてみる
+                        ガイド付き自由記述
                     </div>
+                    <p class="section-desc" style="margin-bottom:12px">ヒントを参考に、Eメール返信を自分で書いてみましょう。</p>
+                    <div id="step2Hints"></div>
                     <textarea class="writing-area" id="step2Writing"
                         placeholder="ここにEメール返信を書いてください（40〜50語）..."></textarea>
                     <div class="word-counter" id="step2WordCounter">
@@ -390,9 +408,14 @@
                             <div class="check-item" data-check="4">
                                 <div class="check-box"><span class="material-symbols-rounded"
                                         style="font-size:14px;display:none">check</span></div>
-                                下線部について2つ質問しているか？
+                                理由を1つ述べているか？
                             </div>
                             <div class="check-item" data-check="5">
+                                <div class="check-box"><span class="material-symbols-rounded"
+                                        style="font-size:14px;display:none">check</span></div>
+                                下線部について2つ質問しているか？
+                            </div>
+                            <div class="check-item" data-check="6">
                                 <div class="check-box"><span class="material-symbols-rounded"
                                         style="font-size:14px;display:none">check</span></div>
                                 語数は40〜50語の範囲内か？
