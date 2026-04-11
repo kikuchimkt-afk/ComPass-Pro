@@ -341,5 +341,335 @@ const EMAIL_THEMES = [
         ],
         modelAnswer: "Hi, Alex!\nThank you for your e-mail. I think more cities will provide such a bus service in the future. Elderly people often cannot drive by themselves, so free buses are helpful. I have two questions about the city. How many people live in the city? Is the city a nice place to live?\nBest wishes,",
         modelAnswerJa: "アレックスへ\nメールありがとう。もっと多くの都市がそのようなバスサービスを提供すると思います。高齢者は自分で運転できないことが多いので、無料バスは役に立つからです。街について2つ質問があります。その街にはどのくらいの人が住んでいますか？その街は住みやすいですか？\n敬具"
+    },
+
+    // ===== 2024-1 土曜準会場 =====
+    {
+        id: 7,
+        title: "ペンと紙に書く機会",
+        exam: "2024-1土曜",
+        underlinedTopic: "a pen",
+        alexEmail: "I have something to tell you about. My grandfather bought me a pen yesterday. I wanted something as a gift for my graduation, and he bought it at the department store. The pen looks great. I want to use it often, but there is a problem. I have fewer chances to write something on paper now. Do you think such chances will continue to decrease in the future?",
+        alexEmailJa: "伝えたいことがあります。昨日、祖父がペンを買ってくれました。卒業祝いに何かほしかったので、デパートで買ってくれました。ペンはとても素敵です。よく使いたいのですが、問題があります。今は紙に何かを書く機会が少なくなっています。そのような機会は将来も減り続けると思いますか？",
+        opinionQuestion: "Do you think such chances will continue to decrease in the future?",
+        opinions: {
+            agree: {
+                ja: "そう思う",
+                jaText: "紙に書く機会は将来も減り続けると思います",
+                text: "such chances will continue to decrease in the future",
+                chunks: ["such chances", "will continue", "to decrease", "in the future"]
+            },
+            disagree: {
+                ja: "そう思わない",
+                jaText: "紙に書く機会はなくならないと思います",
+                text: "such chances will not disappear completely",
+                chunks: ["such chances", "will not disappear", "completely"]
+            }
+        },
+        reasons: [
+            { ja: "デジタル化が進む", jaText: "多くの人がスマホやパソコンでメッセージを送るので紙に書く必要がありません", text: "Many people send messages on smartphones or computers, so they do not need to write on paper", chunks: ["Many people", "send messages", "on smartphones or computers,", "so they do not need", "to write on paper"] },
+            { ja: "学校でもデジタル化", jaText: "学校でもタブレットを使う機会が増えています", text: "More schools are using tablets instead of notebooks", chunks: ["More schools", "are using tablets", "instead of", "notebooks"] },
+            { ja: "環境に良い", jaText: "紙を使わないことは環境に良いです", text: "Not using paper is good for the environment", chunks: ["Not using paper", "is good for", "the environment"] }
+        ],
+        negativeReasons: [
+            { ja: "手書きは大事", jaText: "手で書くことは記憶力を高めるのに良いです", text: "Writing by hand is good for improving memory", chunks: ["Writing by hand", "is good for", "improving memory"] },
+            { ja: "手紙の価値", jaText: "手書きの手紙は特別な気持ちを伝えられます", text: "Handwritten letters can express special feelings", chunks: ["Handwritten letters", "can express", "special feelings"] }
+        ],
+        questions: [
+            { ja: "場所について", jaText: "そのデパートはどこにありますか", text: "Where is the department store", chunks: ["Where is", "the department store"] },
+            { ja: "値段について", jaText: "そのペンはいくらでしたか", text: "How much was the pen", chunks: ["How much", "was the pen"] },
+            { ja: "色について", jaText: "そのペンは何色ですか", text: "What color is the pen", chunks: ["What color", "is the pen"] },
+            { ja: "ブランドについて", jaText: "そのペンのブランドは何ですか", text: "What brand is the pen", chunks: ["What brand", "is the pen"] },
+            { ja: "使い方について", jaText: "何を書くのに使いますか", text: "What will you use it to write", chunks: ["What", "will you use it", "to write"] }
+        ],
+        transDrillSentences: [
+            { sentenceJa: "紙に書く機会は将来も減り続けると思います。", literalJa: "私は思います / そのような機会は / 減り続けると / 将来", answer: "I think such chances will continue to decrease in the future." },
+            { sentenceJa: "多くの人がスマホやパソコンでメッセージを送るので紙に書く必要がありません。", literalJa: "多くの人が / メッセージを送る / スマホやパソコンで / だから / 書く必要がない / 紙に", answer: "Many people send messages on smartphones or computers, so they do not need to write on paper." },
+            { sentenceJa: "そのペンはいくらでしたか？", literalJa: "いくら / でしたか / そのペンは", answer: "How much was the pen?" },
+            { sentenceJa: "そのペンは何色ですか？", literalJa: "何色 / ですか / そのペンは", answer: "What color is the pen?" }
+        ],
+        guidedHints: [
+            { label: "意見", hintJa: "紙に書く機会が減り続けるか、自分の意見を述べましょう。", modelSentence: "I think such chances will continue to decrease in the future." },
+            { label: "理由", hintJa: "その意見の理由を1文で述べましょう。", modelSentence: "Many people send messages on smartphones or computers, so they do not need to write on paper." },
+            { label: "質問1", hintJa: "ペンについて質問しましょう（値段、色など）。", modelSentence: "How much was the pen?" },
+            { label: "質問2", hintJa: "ペンについてもう1つ質問しましょう（ブランド、使い方など）。", modelSentence: "What color is the pen?" }
+        ],
+        modelAnswer: "Hi, Alex!\nThank you for your e-mail. I think such chances will continue to decrease in the future. Many people send messages on smartphones or computers, so they do not need to write on paper. I have two questions about the pen. How much was the pen? What color is the pen?\nBest wishes,",
+        modelAnswerJa: "アレックスへ\nメールありがとう。紙に書く機会は将来も減り続けると思います。多くの人がスマホやパソコンでメッセージを送るので、紙に書く必要がないからです。ペンについて2つ質問があります。そのペンはいくらでしたか？何色ですか？\n敬具"
+    },
+
+    // ===== 2024-2 土曜準会場 =====
+    {
+        id: 8,
+        title: "運動プログラムとヘッドフォン",
+        exam: "2024-2土曜",
+        underlinedTopic: "a new exercise program",
+        alexEmail: "I want to tell you something. I started a new exercise program last month. Every morning, I run in the park for thirty minutes before I go to school. I want to be healthy, but I don't like to run. For this reason, I wear headphones and listen to music while I am running. Do you think people should wear such things when they are outside?",
+        alexEmailJa: "伝えたいことがあります。先月、新しい運動プログラムを始めました。毎朝、学校に行く前に公園で30分走っています。健康でいたいのですが、走るのが好きではありません。そのため、走っている間ヘッドフォンをつけて音楽を聴いています。外にいるときにそのようなものをつけるべきだと思いますか？",
+        opinionQuestion: "Do you think people should wear such things when they are outside?",
+        opinions: {
+            agree: {
+                ja: "そう思う",
+                jaText: "外でヘッドフォンをつけるのは良いと思います",
+                text: "people should wear such things when they are outside",
+                chunks: ["people", "should wear", "such things", "when they are outside"]
+            },
+            disagree: {
+                ja: "そう思わない",
+                jaText: "外でヘッドフォンをつけるべきではないと思います",
+                text: "people should not wear such things when they are outside",
+                chunks: ["people", "should not wear", "such things", "when they are outside"]
+            }
+        },
+        reasons: [
+            { ja: "楽しくなるから", jaText: "音楽を聴くと運動がもっと楽しくなります", text: "Listening to music makes exercise more enjoyable", chunks: ["Listening to music", "makes exercise", "more enjoyable"] },
+            { ja: "集中できるから", jaText: "音楽は走ることに集中するのに役立ちます", text: "Music helps people focus on running", chunks: ["Music", "helps people", "focus on", "running"] },
+            { ja: "モチベーションが上がる", jaText: "良い音楽を聴くとやる気が出ます", text: "Listening to good music gives people more motivation", chunks: ["Listening to", "good music", "gives people", "more motivation"] }
+        ],
+        negativeReasons: [
+            { ja: "危険だから", jaText: "ヘッドフォンをしていると車の音が聞こえず危険です", text: "Wearing headphones outside is dangerous because people cannot hear cars", chunks: ["Wearing headphones outside", "is dangerous", "because people", "cannot hear cars"] },
+            { ja: "周りに気づかない", jaText: "周りの人に気づかず事故につながる可能性があります", text: "People may not notice others around them and cause accidents", chunks: ["People", "may not notice", "others around them", "and cause accidents"] }
+        ],
+        questions: [
+            { ja: "時間について", jaText: "毎日何時に走っていますか", text: "What time do you run every day", chunks: ["What time", "do you run", "every day"] },
+            { ja: "場所について", jaText: "公園は学校の近くですか", text: "Is the park near your school", chunks: ["Is the park", "near your school"] },
+            { ja: "音楽について", jaText: "どんな音楽を聴いていますか", text: "What kind of music do you listen to", chunks: ["What kind of music", "do you listen to"] },
+            { ja: "ブランドについて", jaText: "どのヘッドフォンを使っていますか", text: "What headphones do you use", chunks: ["What headphones", "do you use"] },
+            { ja: "費用について", jaText: "ヘッドフォンはいくらでしたか", text: "How much were the headphones", chunks: ["How much", "were the headphones"] }
+        ],
+        transDrillSentences: [
+            { sentenceJa: "外にいるときにヘッドフォンをつけるべきだと思います。", literalJa: "私は思います / 人々は〜すべきだと / つける / そのようなもの / 外にいるとき", answer: "I think people should wear such things when they are outside." },
+            { sentenceJa: "音楽を聴くと運動がもっと楽しくなります。", literalJa: "聴くこと / 音楽を / 運動を〜にする / もっと楽しく", answer: "Listening to music makes exercise more enjoyable." },
+            { sentenceJa: "どんな音楽を聴いていますか？", literalJa: "どんな種類の音楽 / を聴いていますか", answer: "What kind of music do you listen to?" },
+            { sentenceJa: "ヘッドフォンはいくらでしたか？", literalJa: "いくら / でしたか / ヘッドフォンは", answer: "How much were the headphones?" }
+        ],
+        guidedHints: [
+            { label: "意見", hintJa: "外でヘッドフォンをつけることについて自分の意見を述べましょう。", modelSentence: "I think people should wear such things when they are outside." },
+            { label: "理由", hintJa: "その意見の理由を1文で述べましょう。", modelSentence: "Listening to music makes exercise more enjoyable." },
+            { label: "質問1", hintJa: "運動プログラムについて質問しましょう（音楽、時間など）。", modelSentence: "What kind of music do you listen to?" },
+            { label: "質問2", hintJa: "運動プログラムについてもう1つ質問しましょう（場所、費用など）。", modelSentence: "How much were the headphones?" }
+        ],
+        modelAnswer: "Hi, Alex!\nThank you for your e-mail. I think people should wear such things when they are outside. Listening to music makes exercise more enjoyable. I have two questions about the exercise program. What kind of music do you listen to? How much were the headphones?\nBest wishes,",
+        modelAnswerJa: "アレックスへ\nメールありがとう。外にいるときにそのようなものをつけるべきだと思います。音楽を聴くと運動がもっと楽しくなるからです。運動プログラムについて2つ質問があります。どんな音楽を聴いていますか？ヘッドフォンはいくらでしたか？\n敬具"
+    },
+
+    // ===== 2024-3 土曜準会場 =====
+    {
+        id: 9,
+        title: "絵画教室と自然スポット",
+        exam: "2024-3土曜",
+        underlinedTopic: "an art class",
+        alexEmail: "Guess what! I started to take an art class with my mother. Every Sunday, the students meet the teacher in the park to make art. I wanted to take the class so I could spend time in nature. Now, I want to go to visit other natural places such as rivers and mountains. Do you think such places will become more popular for people to visit?",
+        alexEmailJa: "聞いて！母と一緒に絵画教室に通い始めました。毎週日曜日、生徒たちは公園で先生と会って絵を描きます。自然の中で過ごしたくてこの教室に入りました。今は、川や山など他の自然の場所にも行きたいと思っています。そのような場所は訪れる人にとってもっと人気になると思いますか？",
+        opinionQuestion: "Do you think such places will become more popular for people to visit?",
+        opinions: {
+            agree: {
+                ja: "そう思う",
+                jaText: "川や山のような場所は訪れる人にもっと人気になると思います",
+                text: "places like rivers and mountains will become more popular for people to visit",
+                chunks: ["places like", "rivers and mountains", "will become", "more popular", "for people to visit"]
+            },
+            disagree: {
+                ja: "そう思わない",
+                jaText: "多くの人は自然の場所を訪れることに興味がないと思います",
+                text: "many people are not interested in visiting natural places",
+                chunks: ["many people", "are not interested", "in visiting", "natural places"]
+            }
+        },
+        reasons: [
+            { ja: "リフレッシュできる", jaText: "自然の場所に行くとリラックスできます", text: "People can relax by going to natural places", chunks: ["People", "can relax", "by going to", "natural places"] },
+            { ja: "健康に良い", jaText: "自然の中を歩くことは健康に良いです", text: "Walking in nature is good for your health", chunks: ["Walking", "in nature", "is good for", "your health"] },
+            { ja: "写真が撮れる", jaText: "美しい風景はSNSに写真を投稿するのに最適です", text: "Beautiful scenery is perfect for posting photos on social media", chunks: ["Beautiful scenery", "is perfect", "for posting photos", "on social media"] }
+        ],
+        negativeReasons: [
+            { ja: "アクセスが不便", jaText: "川や山は都市から遠く、行くのが大変です", text: "Rivers and mountains are far from cities and hard to get to", chunks: ["Rivers and mountains", "are far from cities", "and hard to get to"] },
+            { ja: "天候に左右される", jaText: "自然の場所は天気が悪いと楽しめません", text: "Natural places are not enjoyable when the weather is bad", chunks: ["Natural places", "are not enjoyable", "when the weather is bad"] }
+        ],
+        questions: [
+            { ja: "費用について", jaText: "絵画教室に通うのにいくらかかりますか", text: "How much does it cost to attend the art class", chunks: ["How much", "does it cost", "to attend", "the art class"] },
+            { ja: "道具について", jaText: "絵画教室のために何の道具を用意しましたか", text: "What tools did you need to get for the art class", chunks: ["What tools", "did you need to get", "for the art class"] },
+            { ja: "人数について", jaText: "教室には何人生徒がいますか", text: "How many students are in the class", chunks: ["How many students", "are in", "the class"] },
+            { ja: "時間について", jaText: "教室は何時間ありますか", text: "How long is each class", chunks: ["How long is", "each class"] },
+            { ja: "作品について", jaText: "何を描くのが好きですか", text: "What do you like to draw", chunks: ["What", "do you like", "to draw"] }
+        ],
+        transDrillSentences: [
+            { sentenceJa: "川や山のような場所は訪れる人にもっと人気になると思います。", literalJa: "私は思います / 川や山のような場所は / もっと人気になると / 訪れる人に", answer: "I think places like rivers and mountains will become more popular for people to visit." },
+            { sentenceJa: "自然の場所に行くとリラックスできます。", literalJa: "人々は / リラックスできます / 行くことで / 自然の場所に", answer: "People can relax by going to natural places." },
+            { sentenceJa: "絵画教室に通うのにいくらかかりますか？", literalJa: "いくら / かかりますか / 通うのに / 絵画教室に", answer: "How much does it cost to attend the art class?" },
+            { sentenceJa: "絵画教室のために何の道具を用意しましたか？", literalJa: "何の道具を / 用意する必要がありましたか / 絵画教室のために", answer: "What tools did you need to get for the art class?" }
+        ],
+        guidedHints: [
+            { label: "意見", hintJa: "自然の場所がもっと人気になるか、自分の意見を述べましょう。", modelSentence: "I think places like rivers and mountains will become more popular for people to visit." },
+            { label: "理由", hintJa: "その意見の理由を1文で述べましょう。", modelSentence: "People can relax by going to natural places." },
+            { label: "質問1", hintJa: "絵画教室について質問しましょう（費用、道具など）。", modelSentence: "How much does it cost to attend the art class?" },
+            { label: "質問2", hintJa: "絵画教室についてもう1つ質問しましょう（人数、時間など）。", modelSentence: "What tools did you need to get for the art class?" }
+        ],
+        modelAnswer: "Hi, Alex!\nThank you for your e-mail. I think places like rivers and mountains will become more popular for people to visit. People can relax by going to natural places. I have two questions about the art class. How much does it cost to attend the art class? What tools did you need to get for the art class?\nBest wishes,",
+        modelAnswerJa: "アレックスへ\nメールありがとう。川や山のような場所は訪れる人にもっと人気になると思います。自然の場所に行くとリラックスできるからです。絵画教室について2つ質問があります。絵画教室に通うのにいくらかかりますか？何の道具を用意しましたか？\n敬具"
+    },
+
+    // ===== 2025-1 土曜準会場 =====
+    {
+        id: 10,
+        title: "新聞と海外在住の日本人",
+        exam: "2025-1土曜",
+        underlinedTopic: "a newspaper",
+        alexEmail: "Every day, I read a newspaper to study Japanese. I started in April, and I spend about 2,000 yen a month to buy it. It includes not only Japanese articles but also an explanation of the articles in English. While reading the newspaper, I read something interesting. There was a story about Japanese people living abroad. Do you think the number of such people will increase in the future?",
+        alexEmailJa: "毎日、日本語を勉強するために新聞を読んでいます。4月に始めて、月に約2,000円かかります。日本語の記事だけでなく、英語での記事の説明も載っています。新聞を読んでいるとき、面白い記事を見つけました。海外に住む日本人についての話がありました。そのような人の数は将来増えると思いますか？",
+        opinionQuestion: "Do you think the number of such people will increase in the future?",
+        opinions: {
+            agree: {
+                ja: "そう思う",
+                jaText: "海外に住む日本人の数は将来増えると思います",
+                text: "the number of Japanese people living abroad will increase in the future",
+                chunks: ["the number of", "Japanese people", "living abroad", "will increase", "in the future"]
+            },
+            disagree: {
+                ja: "そう思わない",
+                jaText: "多くの日本人は海外に住むことを選ばないと思います",
+                text: "many Japanese people will not choose to live abroad",
+                chunks: ["many Japanese people", "will not choose", "to live abroad"]
+            }
+        },
+        reasons: [
+            { ja: "仕事の機会", jaText: "海外に住むことでより多くの仕事の機会を得られます", text: "They can have more job opportunities by living abroad", chunks: ["They", "can have", "more job opportunities", "by living abroad"] },
+            { ja: "語学力向上", jaText: "海外に住むと外国語を上達させることができます", text: "Living abroad helps people improve their foreign language skills", chunks: ["Living abroad", "helps people", "improve", "their foreign language skills"] },
+            { ja: "グローバル化", jaText: "世界はもっとグローバルになり海外で働きやすくなっています", text: "The world is becoming more global and it is easier to work overseas", chunks: ["The world", "is becoming", "more global", "and it is easier", "to work overseas"] }
+        ],
+        negativeReasons: [
+            { ja: "家族と離れる", jaText: "海外に住むと家族や友達と離れなければなりません", text: "People have to be away from their family and friends", chunks: ["People", "have to be away", "from their family", "and friends"] },
+            { ja: "文化の違い", jaText: "海外での生活は文化の違いがあり大変です", text: "Living abroad is difficult because of cultural differences", chunks: ["Living abroad", "is difficult", "because of", "cultural differences"] }
+        ],
+        questions: [
+            { ja: "ページ数について", jaText: "新聞は普段何ページありますか", text: "How many pages does the newspaper usually have", chunks: ["How many pages", "does the newspaper", "usually have"] },
+            { ja: "写真について", jaText: "記事に写真はたくさんありますか", text: "Are there many photographs in the articles", chunks: ["Are there", "many photographs", "in the articles"] },
+            { ja: "配達について", jaText: "新聞はどうやって届きますか", text: "How is the newspaper delivered", chunks: ["How is", "the newspaper", "delivered"] },
+            { ja: "内容について", jaText: "どんな種類の記事が好きですか", text: "What kind of articles do you like", chunks: ["What kind of articles", "do you like"] },
+            { ja: "頻度について", jaText: "毎日どのくらい読みますか", text: "How long do you read it every day", chunks: ["How long", "do you read it", "every day"] }
+        ],
+        transDrillSentences: [
+            { sentenceJa: "海外に住む日本人の数は将来増えると思います。", literalJa: "私は思います / 日本人の数は / 海外に住む / 増えると / 将来", answer: "I think the number of Japanese people living abroad will increase in the future." },
+            { sentenceJa: "海外に住むことでより多くの仕事の機会を得られます。", literalJa: "彼らは / 得られます / より多くの仕事の機会を / 住むことで / 海外に", answer: "They can have more job opportunities by living abroad." },
+            { sentenceJa: "新聞は普段何ページありますか？", literalJa: "何ページ / ありますか / 新聞は / 普段", answer: "How many pages does the newspaper usually have?" },
+            { sentenceJa: "記事に写真はたくさんありますか？", literalJa: "ありますか / たくさんの写真が / 記事に", answer: "Are there many photographs in the articles?" }
+        ],
+        guidedHints: [
+            { label: "意見", hintJa: "海外に住む日本人が増えるか、自分の意見を述べましょう。", modelSentence: "I think the number of Japanese people living abroad will increase in the future." },
+            { label: "理由", hintJa: "その意見の理由を1文で述べましょう。", modelSentence: "They can have more job opportunities by living abroad." },
+            { label: "質問1", hintJa: "新聞について質問しましょう（ページ数、写真など）。", modelSentence: "How many pages does the newspaper usually have?" },
+            { label: "質問2", hintJa: "新聞についてもう1つ質問しましょう（内容、配達方法など）。", modelSentence: "Are there many photographs in the articles?" }
+        ],
+        modelAnswer: "Hi, Alex!\nThank you for your e-mail. I think the number of Japanese people living abroad will increase in the future. They can have more job opportunities by living abroad. I have two questions about the newspaper. How many pages does the newspaper usually have? Are there many photographs in the articles?\nBest wishes,",
+        modelAnswerJa: "アレックスへ\nメールありがとう。海外に住む日本人の数は将来増えると思います。海外に住むことでより多くの仕事の機会を得られるからです。新聞について2つ質問があります。新聞は普段何ページありますか？記事に写真はたくさんありますか？\n敬具"
+    },
+
+    // ===== 2025-2 土曜準会場 =====
+    {
+        id: 11,
+        title: "ファッション雑誌と試着アプリ",
+        exam: "2025-2土曜",
+        underlinedTopic: "a fashion magazine",
+        alexEmail: "I have something to tell you. Yesterday, I read a fashion magazine. It sells about 200,000 copies every three months. It has been popular for ten years, but I bought it for the first time. While reading it, I learned something interesting. There are smartphone apps that use a phone's camera to see if clothes fit before people buy them. Do you think such apps will become more popular in the future?",
+        alexEmailJa: "伝えたいことがあります。昨日、ファッション雑誌を読みました。3ヶ月ごとに約20万部売れています。10年間人気がありますが、初めて買いました。読んでいるとき、面白いことを知りました。スマホのカメラを使って、服が合うかどうか買う前に確認できるアプリがあるそうです。そのようなアプリは将来もっと人気になると思いますか？",
+        opinionQuestion: "Do you think such apps will become more popular in the future?",
+        opinions: {
+            agree: {
+                ja: "そう思う",
+                jaText: "スマホのカメラで試着できるアプリはもっと人気になると思います",
+                text: "apps that use a phone's camera to see if clothes fit will become more popular",
+                chunks: ["apps that use", "a phone's camera", "to see if clothes fit", "will become", "more popular"]
+            },
+            disagree: {
+                ja: "そう思わない",
+                jaText: "実際に試着する方が良いのでそのようなアプリは人気にならないと思います",
+                text: "such apps will not become popular because people prefer to try on clothes in person",
+                chunks: ["such apps", "will not become popular", "because people prefer", "to try on clothes", "in person"]
+            }
+        },
+        reasons: [
+            { ja: "時間の節約", jaText: "店に行かなくて済むので時間を節約できます", text: "People can save time by not going to the store", chunks: ["People", "can save time", "by not going", "to the store"] },
+            { ja: "便利だから", jaText: "家にいながら色々な服を試すことができます", text: "People can try many clothes at home without going out", chunks: ["People", "can try", "many clothes", "at home", "without going out"] },
+            { ja: "テクノロジーの進化", jaText: "テクノロジーはどんどん良くなっているのでアプリの精度も上がります", text: "Technology is getting better, so the apps will become more accurate", chunks: ["Technology", "is getting better,", "so the apps", "will become", "more accurate"] }
+        ],
+        negativeReasons: [
+            { ja: "実物と違う", jaText: "画面上では実際の質感やサイズ感がわかりません", text: "People cannot feel the real texture or size on a screen", chunks: ["People", "cannot feel", "the real texture or size", "on a screen"] },
+            { ja: "買い物の楽しみ", jaText: "店で実際に試着する方が楽しいです", text: "It is more fun to try on clothes at the store", chunks: ["It is", "more fun", "to try on clothes", "at the store"] }
+        ],
+        questions: [
+            { ja: "値段について", jaText: "雑誌1冊いくらですか", text: "How much is one copy of the magazine", chunks: ["How much is", "one copy of", "the magazine"] },
+            { ja: "年齢層について", jaText: "どの年齢層がその雑誌を一番買いますか", text: "Which age group buys that magazine the most", chunks: ["Which age group", "buys that magazine", "the most"] },
+            { ja: "内容について", jaText: "雑誌にどんな記事がありますか", text: "What kind of articles are in the magazine", chunks: ["What kind of articles", "are in", "the magazine"] },
+            { ja: "頻度について", jaText: "その雑誌はどのくらいの頻度で発行されますか", text: "How often is the magazine published", chunks: ["How often is", "the magazine", "published"] },
+            { ja: "おすすめについて", jaText: "雑誌で一番好きなページは何ですか", text: "What is your favorite page in the magazine", chunks: ["What is", "your favorite page", "in the magazine"] }
+        ],
+        transDrillSentences: [
+            { sentenceJa: "スマホのカメラで試着できるアプリはもっと人気になると思います。", literalJa: "私は思います / アプリは / 使う / スマホのカメラを / 確認するために / 服が合うか / もっと人気になると", answer: "I think apps that use a phone's camera to see if clothes fit will become more popular." },
+            { sentenceJa: "店に行かなくて済むので時間を節約できます。", literalJa: "人々は / 時間を節約できます / 行かないことで / 店に", answer: "People can save time by not going to the store." },
+            { sentenceJa: "雑誌1冊いくらですか？", literalJa: "いくら / ですか / 1冊 / 雑誌の", answer: "How much is one copy of the magazine?" },
+            { sentenceJa: "どの年齢層がその雑誌を一番買いますか？", literalJa: "どの年齢層が / 買いますか / その雑誌を / 一番", answer: "Which age group buys that magazine the most?" }
+        ],
+        guidedHints: [
+            { label: "意見", hintJa: "試着アプリが人気になるか、自分の意見を述べましょう。", modelSentence: "I think apps that use a phone's camera to see if clothes fit will become more popular." },
+            { label: "理由", hintJa: "その意見の理由を1文で述べましょう。", modelSentence: "People can save time by not going to the store." },
+            { label: "質問1", hintJa: "雑誌について質問しましょう（値段、年齢層など）。", modelSentence: "How much is one copy of the magazine?" },
+            { label: "質問2", hintJa: "雑誌についてもう1つ質問しましょう（内容、発行頻度など）。", modelSentence: "Which age group buys that magazine the most?" }
+        ],
+        modelAnswer: "Hi, Alex!\nThank you for your e-mail. I think apps that use a phone's camera to see if clothes fit will become more popular. People can save time by not going to the store. I have two questions. How much is one copy of the magazine? Which age group buys that magazine the most?\nBest wishes,",
+        modelAnswerJa: "アレックスへ\nメールありがとう。スマホのカメラで試着できるアプリはもっと人気になると思います。店に行かなくて済むので時間を節約できるからです。2つ質問があります。雑誌1冊いくらですか？どの年齢層がその雑誌を一番買いますか？\n敬具"
+    },
+
+    // ===== 2025-3 土曜準会場 =====
+    {
+        id: 12,
+        title: "本棚とモールのイベントスペース",
+        exam: "2025-3土曜",
+        underlinedTopic: "a bookshelf",
+        alexEmail: "I bought a bookshelf at the shopping mall near my house last Sunday. I bought it because it is white and the color matches my room very well. While I was walking around the mall, I saw something interesting. On the second floor, there was an area with a stage to hold events, such as a small concert. Do you think more shopping malls will have such an area in the future?",
+        alexEmailJa: "先週の日曜日、家の近くのショッピングモールで本棚を買いました。白くて部屋の色にとても合っているので買いました。モールを歩いていると、面白いものを見ました。2階に、小さなコンサートなどのイベントを開くためのステージがあるエリアがありました。将来、もっと多くのショッピングモールにそのようなエリアができると思いますか？",
+        opinionQuestion: "Do you think more shopping malls will have such an area in the future?",
+        opinions: {
+            agree: {
+                ja: "そう思う",
+                jaText: "もっと多くのショッピングモールにイベント用のステージがあるエリアができると思います",
+                text: "more shopping malls will have an area with a stage to hold events",
+                chunks: ["more shopping malls", "will have", "an area", "with a stage", "to hold events"]
+            },
+            disagree: {
+                ja: "そう思わない",
+                jaText: "ショッピングモールにそのようなスペースは必要ないと思います",
+                text: "shopping malls do not need such spaces",
+                chunks: ["shopping malls", "do not need", "such spaces"]
+            }
+        },
+        reasons: [
+            { ja: "集客効果", jaText: "イベントを開くことでモールはもっと多くの人を集められます", text: "Shopping malls can attract more people by holding events in such spaces", chunks: ["Shopping malls", "can attract", "more people", "by holding events", "in such spaces"] },
+            { ja: "楽しい場所になる", jaText: "イベントがあるとモールがもっと楽しい場所になります", text: "Events make shopping malls more fun places to visit", chunks: ["Events", "make shopping malls", "more fun places", "to visit"] },
+            { ja: "地域の交流", jaText: "イベントスペースは地域の人々の交流の場になります", text: "Event spaces help people in the community interact with each other", chunks: ["Event spaces", "help people", "in the community", "interact with each other"] }
+        ],
+        negativeReasons: [
+            { ja: "スペースの無駄", jaText: "店のスペースが減ってしまいます", text: "There will be less space for stores", chunks: ["There will be", "less space", "for stores"] },
+            { ja: "費用がかかる", jaText: "ステージやイベントの準備にお金がかかります", text: "It costs a lot of money to build a stage and prepare events", chunks: ["It costs", "a lot of money", "to build a stage", "and prepare events"] }
+        ],
+        questions: [
+            { ja: "値段について", jaText: "本棚はいくらでしたか", text: "How much was the bookshelf", chunks: ["How much", "was the bookshelf"] },
+            { ja: "サイズについて", jaText: "本棚は本を全部入れられるくらい大きいですか", text: "Is the bookshelf big enough to hold all of your books", chunks: ["Is the bookshelf", "big enough", "to hold all of", "your books"] },
+            { ja: "場所について", jaText: "本棚を部屋のどこに置きましたか", text: "Where did you put the bookshelf in your room", chunks: ["Where", "did you put", "the bookshelf", "in your room"] },
+            { ja: "モールについて", jaText: "モールにはどんな店がありますか", text: "What kind of stores are in the mall", chunks: ["What kind of stores", "are in", "the mall"] },
+            { ja: "モールの距離", jaText: "モールは家からどのくらいですか", text: "How far is the mall from your house", chunks: ["How far is", "the mall", "from your house"] }
+        ],
+        transDrillSentences: [
+            { sentenceJa: "もっと多くのショッピングモールにイベント用のステージがあるエリアができると思います。", literalJa: "私は思います / もっと多くのモールに / あるだろうと / エリアが / ステージがある / イベントを開くための", answer: "I think more shopping malls will have an area with a stage to hold events." },
+            { sentenceJa: "イベントを開くことでモールはもっと多くの人を集められます。", literalJa: "モールは / 集められます / もっと多くの人を / 開くことで / イベントを / そのようなスペースで", answer: "Shopping malls can attract more people by holding events in such spaces." },
+            { sentenceJa: "本棚はいくらでしたか？", literalJa: "いくら / でしたか / 本棚は", answer: "How much was the bookshelf?" },
+            { sentenceJa: "本棚は本を全部入れられるくらい大きいですか？", literalJa: "本棚は / 十分大きいですか / 入れるのに / 全部の本を", answer: "Is the bookshelf big enough to hold all of your books?" }
+        ],
+        guidedHints: [
+            { label: "意見", hintJa: "モールにイベントスペースが増えるか、自分の意見を述べましょう。", modelSentence: "I think more shopping malls will have an area with a stage to hold events." },
+            { label: "理由", hintJa: "その意見の理由を1文で述べましょう。", modelSentence: "Shopping malls can attract more people by holding events in such spaces." },
+            { label: "質問1", hintJa: "本棚について質問しましょう（値段、サイズなど）。", modelSentence: "How much was the bookshelf?" },
+            { label: "質問2", hintJa: "本棚についてもう1つ質問しましょう（場所、容量など）。", modelSentence: "Is the bookshelf big enough to hold all of your books?" }
+        ],
+        modelAnswer: "Hi, Alex!\nThank you for your e-mail. I think more shopping malls will have an area with a stage to hold events. Shopping malls can attract more people by holding events in such spaces. I have two questions about the bookshelf. How much was the bookshelf? Is the bookshelf big enough to hold all of your books?\nBest wishes,",
+        modelAnswerJa: "アレックスへ\nメールありがとう。もっと多くのショッピングモールにイベント用のステージがあるエリアができると思います。イベントを開くことでモールはもっと多くの人を集められるからです。本棚について2つ質問があります。本棚はいくらでしたか？本棚は本を全部入れられるくらい大きいですか？\n敬具"
     }
 ];

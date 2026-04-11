@@ -410,7 +410,7 @@ const EMAIL_THEMES = [
     {
         id: 7,
         title: "朝食のサンドイッチ",
-        exam: "2024-1S",
+        exam: "2024-1土曜",
         senderName: "James",
         senderEmail: "Hi,\nThank you for your e-mail. I hear that you usually eat sandwiches for breakfast. I have some questions for you. <u>How many sandwiches do you usually eat? And what kind of sandwiches do you like?</u>\n\nYour friend,\nJames",
         senderEmailJa: "こんにちは。\nメールをありがとう。あなたがいつも朝食にサンドイッチを食べていると聞きました。いくつか質問があります。<u>いつもサンドイッチをいくつ食べますか？そしてどんな種類のサンドイッチが好きですか？</u>\n\nあなたの友人、\nジェームズ",
@@ -474,7 +474,7 @@ const EMAIL_THEMES = [
     {
         id: 8,
         title: "新しい家",
-        exam: "2024-2S",
+        exam: "2024-2土曜",
         senderName: "James",
         senderEmail: "Hi,\nThank you for your e-mail. I heard that you started living in a new house. Please tell me about your new house. <u>What is your favorite place in your house? And what color is your house?</u>\n\nYour friend,\nJames",
         senderEmailJa: "こんにちは。\nメールをありがとう。あなたが新しい家に住み始めたと聞きました。新しい家について教えてください。<u>家の中でお気に入りの場所はどこですか？そして家は何色ですか？</u>\n\nあなたの友人、\nジェームズ",
@@ -538,7 +538,7 @@ const EMAIL_THEMES = [
     {
         id: 9,
         title: "スマートフォン",
-        exam: "2024-3S",
+        exam: "2024-3土曜",
         senderName: "James",
         senderEmail: "Hi,\nThank you for your e-mail. Your brother said that you bought a smartphone. I have some questions about it. <u>What color is your new phone? And when do you usually use it?</u>\n\nYour friend,\nJames",
         senderEmailJa: "こんにちは。\nメールをありがとう。あなたのお兄さん（弟）がスマートフォンを買ったと言っていました。いくつか質問があります。<u>新しいスマホは何色ですか？そしていつもいつ使いますか？</u>\n\nあなたの友人、\nジェームズ",
@@ -602,7 +602,7 @@ const EMAIL_THEMES = [
     {
         id: 10,
         title: "動物園",
-        exam: "2025-1S",
+        exam: "2025-1土曜",
         senderName: "James",
         senderEmail: "Hi,\nThank you for your e-mail. Your brother told me that you went to the zoo last weekend. I have some questions for you. <u>How did you go to the zoo? And what animal did you like the best there?</u>\n\nYour friend,\nJames",
         senderEmailJa: "こんにちは。\nメールをありがとう。あなたのお兄さん（弟）から先週末に動物園に行ったと聞きました。いくつか質問があります。<u>動物園にはどうやって行きましたか？そしてそこで一番好きだった動物は何ですか？</u>\n\nあなたの友人、\nジェームズ",
@@ -666,7 +666,7 @@ const EMAIL_THEMES = [
     {
         id: 11,
         title: "星の観察",
-        exam: "2025-2S",
+        exam: "2025-2土曜",
         senderName: "James",
         senderEmail: "Hi,\nThank you for your e-mail. My friend tells me that you like to watch the stars at night. I have some questions for you. <u>What time do you start watching the stars? And where is your favorite place to watch them?</u>\n\nYour friend,\nJames",
         senderEmailJa: "こんにちは。\nメールをありがとう。あなたが夜に星を見るのが好きだと友達から聞きました。いくつか質問があります。<u>何時に星を見始めますか？そして星を見るお気に入りの場所はどこですか？</u>\n\nあなたの友人、\nジェームズ",
@@ -730,7 +730,7 @@ const EMAIL_THEMES = [
     {
         id: 12,
         title: "新しい博物館",
-        exam: "2025-3S",
+        exam: "2025-3土曜",
         senderName: "James",
         senderEmail: "Hi,\nThank you for your e-mail. Your mother tells me that a new museum will open in your hometown. I have some questions about the museum. <u>When will the museum open in your hometown? And how much is a ticket?</u>\n\nYour friend,\nJames",
         senderEmailJa: "こんにちは。\nメールをありがとう。あなたのお母さんから、あなたの町に新しい博物館がオープンすると聞きました。その博物館について質問があります。<u>博物館はいつオープンしますか？そしてチケットはいくらですか？</u>\n\nあなたの友人、\nジェームズ",
