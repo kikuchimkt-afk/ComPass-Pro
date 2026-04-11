@@ -373,7 +373,7 @@ function gradeSentenceWithGemini(sentenceJa, modelAnswer, studentAnswer, gradeId
 5. "corrected": 文法ミスがあれば修正した文。もし生徒の文法が完璧なら生徒の解答をそのまま入れてください。
 6. "betterExpression": ネイティブから見てさらに自然で美しい言い回しや、別の表現の提案（任意）`;
 
-    const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=' + apiKey;
+
 
     const payload = {
         contents: [{
