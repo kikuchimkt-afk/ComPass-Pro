@@ -1657,6 +1657,23 @@ body { font-family: 'Times New Roman', 'Noto Serif JP', serif; font-size: 11pt; 
                 btn.title = 'AI採点 (接続済み)';
             });
         }
+
+        // QRロックモード: ?theme= パラメータがある場合、ホームリンクとテーマ切替を非表示
+        if (themeParam) {
+            applyLockedMode();
+        }
     });
+
+    function applyLockedMode() {
+        const titleLink = document.querySelector('.app-title[href="index.html"]');
+        if (titleLink) {
+            titleLink.removeAttribute('href');
+            titleLink.style.cursor = 'default';
+        }
+        const themeSelector = document.getElementById('themeSelector');
+        if (themeSelector) {
+            themeSelector.style.display = 'none';
+        }
+    }
 
 })();

@@ -1584,6 +1584,24 @@ body { font-family: 'Times New Roman', 'Noto Serif JP', serif; font-size: 11pt; 
         initAiGrading('step2');
         initAiGrading('step3');
         renderStep1();
+
+        // QRロックモード: ?theme= パラメータがある場合、ホームリンクとテーマ切替を非表示
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('theme') !== null) {
+            applyLockedMode();
+        }
+    }
+
+    function applyLockedMode() {
+        const titleLink = document.querySelector('.app-title[href="index.html"]');
+        if (titleLink) {
+            titleLink.removeAttribute('href');
+            titleLink.style.cursor = 'default';
+        }
+        const themeSelector = document.getElementById('themeSelector');
+        if (themeSelector) {
+            themeSelector.style.display = 'none';
+        }
     }
 
     if (document.readyState === 'loading') {

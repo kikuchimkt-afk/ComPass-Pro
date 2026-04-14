@@ -2170,6 +2170,25 @@ ${getPrintStyles(minWords, maxWords)}
                 btn.title = 'AI採点 (接続済み)';
             });
         }
+
+        // QRロックモード: ?theme= パラメータがある場合、ホームリンクとテーマ切替を非表示
+        if (themeParam) {
+            applyLockedMode();
+        }
+    }
+
+    function applyLockedMode() {
+        // ヘッダーのタイトルリンクを無効化（index.htmlへの遷移を防止）
+        const titleLink = document.querySelector('.app-title[href="index.html"]');
+        if (titleLink) {
+            titleLink.removeAttribute('href');
+            titleLink.style.cursor = 'default';
+        }
+        // テーマセレクター（回の切替）を非表示
+        const themeSelector = document.getElementById('themeSelector');
+        if (themeSelector) {
+            themeSelector.style.display = 'none';
+        }
     }
 
     document.addEventListener('DOMContentLoaded', init);
