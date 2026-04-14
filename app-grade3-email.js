@@ -30,6 +30,7 @@
     let timerSeconds = 0;
     let timerRunning = false;
     let isGrading = false;
+    let lastGradeData = {};
 
     // GAS URL（AI採点）
     const GAS_URL_KEY = 'writepass-gas-url';
@@ -1010,12 +1011,14 @@
         });
     }
 
-    function renderGradeResult(prefix, result) {
+    function renderGradeResult(prefix, result, studentAnswer) {
+        lastGradeData[prefix] = { result, studentAnswer };
+
         const container = $(prefix + 'GradeResult');
         if (!container) return;
         container.style.display = '';
 
-        const maxTotal = 9; // 3級Eメールは3観点×3点 = 9点
+        const maxTotal = result.categories ? result.categories.reduce((sum, c) => sum + (c.maxScore || 3), 0) : 9;
         const pct = Math.round((result.totalScore || 0) / maxTotal * 100);
         const grade = pct >= 80 ? 'excellent' : pct >= 60 ? 'good' : pct >= 40 ? 'fair' : 'poor';
         const gradeLabels = { excellent: '🌟 素晴らしい！', good: '👍 良い！', fair: '📝 惜しい！', poor: '💪 がんばろう！' };
@@ -1031,21 +1034,301 @@
                     <div class="grade-label" style="color:${gradeColors[grade]}">${gradeLabels[grade]}</div>
                     <div class="grade-comment">${escapeHtml(result.overallComment || '').replace(/\n/g, '<br>')}</div>
                 </div>
+
+                <div class="grade-highlight-hint">
+                    <span class="material-symbols-rounded" style="font-size:16px">touch_app</span>
+                    各項目をタップすると該当箇所がハイライトされます
+                </div>
+
+                <div class="grade-highlight-view" id="${prefix}HighlightView" style="display:none"></div>
+
                 ${result.categories ? `
                     <div class="grade-categories">
-                        ${result.categories.map(cat => `
-                            <div class="grade-cat">
+                        ${result.categories.map((cat, idx) => {
+            const catPct = cat.score / (cat.maxScore || 3) * 100;
+            return `
+                            <div class="grade-cat clickable" data-cat-idx="${idx}">
                                 <div class="grade-cat-header">
                                     <span class="grade-cat-name">${escapeHtml(cat.name)}</span>
                                     <span class="grade-cat-score">${cat.score} / ${cat.maxScore || 3}</span>
                                 </div>
+                                <div class="grade-cat-bar">
+                                    <div class="grade-cat-bar-fill" style="width:${catPct}%;background:${catPct >= 75 ? 'var(--success)' : catPct >= 50 ? 'var(--warning)' : 'var(--error)'}"></div>
+                                </div>
                                 <div class="grade-cat-comment">${escapeHtml(cat.comment || '')}</div>
-                            </div>
-                        `).join('')}
+                            </div>`;
+        }).join('')}
                     </div>
                 ` : ''}
+
+                ${result.improvedVersion ? `
+                <div class="grade-improved">
+                    <div class="grade-improved-label">
+                        <span class="material-symbols-rounded" style="font-size:18px">lightbulb</span>
+                        改善例
+                    </div>
+                    <div class="grade-improved-text">${result.improvedVersion}</div>
+                    <div style="font-size:0.72rem;color:var(--text-secondary);margin-top:4px">語数: ${countWords(result.improvedVersion)}語</div>
+                </div>` : ''}
+
+                ${result.errors && result.errors.length > 0 ? `
+                <div class="grade-errors">
+                    <div class="grade-errors-label">
+                        <span class="material-symbols-rounded" style="font-size:18px">edit_note</span>
+                        添削 (${result.errors.length}件)
+                    </div>
+                    <div class="grade-errors-list">
+                        ${result.errors.map(err => {
+            const typeLabels = { spelling: 'スペル', grammar: '文法', vocabulary: '語法', punctuation: '句読点' };
+            const typeColors = { spelling: '#ef4444', grammar: '#f59e0b', vocabulary: '#8b5cf6', punctuation: '#6b7280' };
+            return `
+                        <div class="grade-error-item">
+                            <div class="grade-error-header">
+                                <span class="grade-error-type" style="background:${typeColors[err.type] || '#666'}">${typeLabels[err.type] || err.type}</span>
+                                <span class="grade-error-original">${err.original}</span>
+                                <span class="grade-error-arrow">→</span>
+                                <span class="grade-error-corrected">${err.corrected}</span>
+                            </div>
+                            <div class="grade-error-explanation">${err.explanation}</div>
+                        </div>`;
+        }).join('')}
+                    </div>
+                </div>` : (result.errors ? `
+                <div class="grade-errors">
+                    <div class="grade-errors-label">
+                        <span class="material-symbols-rounded" style="font-size:18px">check_circle</span>
+                        添削：ミスはありません 🎉
+                    </div>
+                </div>` : '')}
+
+                <button class="grade-print-btn" id="${prefix}PrintGrade">
+                    <span class="material-symbols-rounded" style="font-size:18px">print</span>
+                    採点レポートを印刷
+                </button>
             </div>
         `;
+
+        // Add click handlers for highlight
+        container.querySelectorAll('.grade-cat.clickable').forEach(catEl => {
+            catEl.addEventListener('click', () => {
+                const idx = parseInt(catEl.dataset.catIdx);
+                const cat = result.categories[idx];
+
+                const wasActive = catEl.classList.contains('active');
+                container.querySelectorAll('.grade-cat').forEach(c => c.classList.remove('active'));
+
+                const highlightView = $(prefix + 'HighlightView');
+
+                if (wasActive) {
+                    highlightView.style.display = 'none';
+                    return;
+                }
+
+                catEl.classList.add('active');
+                highlightView.style.display = '';
+                highlightView.innerHTML = buildHighlightedText(studentAnswer, cat);
+                highlightView.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            });
+        });
+
+        // 印刷ボタン
+        const printGradeBtn = $(prefix + 'PrintGrade');
+        if (printGradeBtn) {
+            printGradeBtn.addEventListener('click', () => printGradeResult(prefix));
+        }
+    }
+
+    // ===== ハイライト表示 =====
+    function buildHighlightedText(studentAnswer, cat) {
+        const highlights = cat.highlightTexts || [];
+        if (highlights.length === 0) {
+            return `<div class="highlight-text-display">${escapeHtml(studentAnswer)}</div>`;
+        }
+
+        const parsed = highlights.map(h => {
+            if (h.startsWith('+')) return { text: h.substring(1).trim(), type: 'good' };
+            if (h.startsWith('-')) return { text: h.substring(1).trim(), type: 'bad' };
+            return { text: h.trim(), type: 'neutral' };
+        }).filter(h => h.text.length > 0);
+
+        let html = escapeHtml(studentAnswer);
+        const sorted = [...parsed].sort((a, b) => b.text.length - a.text.length);
+
+        sorted.forEach(h => {
+            const escaped = escapeHtml(h.text);
+            const regex = new RegExp(escaped.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+            html = html.replace(regex, match =>
+                `<mark class="hl-${h.type}">${match}</mark>`
+            );
+        });
+
+        const hasGood = parsed.some(h => h.type === 'good');
+        const hasBad = parsed.some(h => h.type === 'bad');
+
+        return `
+            <div class="highlight-cat-label">
+                <span class="material-symbols-rounded" style="font-size:18px">format_ink_highlighter</span>
+                ${cat.name}のハイライト
+            </div>
+            <div class="highlight-text-display">${html}</div>
+            <div class="highlight-legend">
+                ${hasGood ? '<span class="hl-legend-item"><mark class="hl-good">良い点</mark></span>' : ''}
+                ${hasBad ? '<span class="hl-legend-item"><mark class="hl-bad">改善点</mark></span>' : ''}
+            </div>
+        `;
+    }
+
+    // ===== AI採点結果を印刷 =====
+    function printGradeResult(prefix) {
+        const data = lastGradeData[prefix];
+        if (!data) return;
+        const { result, studentAnswer } = data;
+        const theme = getTheme();
+        const gradeLabel = WRITEPASS_CONFIG.gradeLabel || '3級';
+        const taskLabel = WRITEPASS_CONFIG.taskLabel || 'Eメール';
+        const maxTotal = result.categories ? result.categories.reduce((sum, c) => sum + (c.maxScore || 3), 0) : 9;
+        const pct = Math.round(result.totalScore / maxTotal * 100);
+
+        const catRows = result.categories.map(cat => {
+            const barPct = Math.round(cat.score / (cat.maxScore || 3) * 100);
+            return `<tr>
+                <td>${cat.name}</td>
+                <td class="cat-score">${cat.score} / ${cat.maxScore || 3}</td>
+                <td class="bar-cell"><div class="bar-visual"><div class="bar-fill" style="width:${barPct}%"></div></div></td>
+                <td>${cat.comment}</td>
+            </tr>`;
+        }).join('');
+
+        const printHtml = `<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>採点結果 — ${theme.title}</title>
+<style>
+@page { size: A4; margin: 18mm 15mm 15mm 15mm; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Times New Roman', 'Noto Serif JP', serif; font-size: 11pt; line-height: 1.6; color: #000; }
+
+.page { page-break-after: always; min-height: 247mm; position: relative; }
+.page:last-child { page-break-after: auto; }
+
+.header { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 2px solid #000; padding-bottom: 6px; margin-bottom: 12px; }
+.header-title { font-size: 14pt; font-weight: bold; }
+.header-meta { font-size: 9pt; color: #444; }
+
+.grade-total { text-align: center; margin-bottom: 10px; }
+.grade-total .score { font-size: 32pt; font-weight: bold; }
+.grade-total .max { font-size: 14pt; color: #666; }
+.grade-total .label { font-size: 12pt; margin-top: 2px; }
+.grade-total .comment { font-size: 9pt; color: #555; margin-top: 4px; max-width: 500px; margin-left: auto; margin-right: auto; }
+
+.student-answer-box { margin-bottom: 14px; padding: 10px 14px; border: 1px solid #333; background: #fafafa; }
+.student-answer-box .sa-label { font-size: 9pt; font-weight: bold; margin-bottom: 4px; }
+.student-answer-box .sa-text { font-size: 10pt; line-height: 1.7; }
+.student-answer-box .sa-count { font-size: 8pt; color: #666; margin-top: 4px; text-align: right; }
+
+.cat-table { width: 100%; border-collapse: collapse; margin-bottom: 14px; }
+.cat-table th, .cat-table td { border: 1px solid #333; padding: 6px 10px; text-align: left; font-size: 10pt; vertical-align: top; }
+.cat-table th { background: #eee; font-weight: bold; }
+.cat-table .cat-score { text-align: center; font-weight: bold; font-size: 12pt; width: 60px; }
+.cat-table .bar-cell { width: 70px; }
+.bar-visual { height: 14px; background: #e0e0e0; position: relative; }
+.bar-fill { height: 100%; background: #333; }
+
+.improved-box { padding: 10px 14px; border: 2px solid #333; background: #f5f5f5; }
+.improved-box .imp-label { font-size: 9pt; font-weight: bold; margin-bottom: 4px; }
+.improved-box .imp-text { font-size: 10pt; line-height: 1.7; }
+.improved-box .imp-count { font-size: 8pt; color: #666; margin-top: 4px; text-align: right; }
+
+.errors-section { margin-top: 14px; }
+.errors-title { font-size: 10pt; font-weight: bold; margin-bottom: 6px; }
+.errors-table { width: 100%; border-collapse: collapse; }
+.errors-table th, .errors-table td { border: 1px solid #333; padding: 4px 8px; text-align: left; font-size: 9pt; vertical-align: top; }
+.errors-table th { background: #eee; font-weight: bold; font-size: 8pt; }
+.errors-table .err-type { width: 45px; text-align: center; font-weight: bold; font-size: 8pt; }
+.errors-table .err-original { color: #c00; text-decoration: line-through; }
+.errors-table .err-arrow { text-align: center; width: 20px; }
+.errors-table .err-corrected { color: #060; font-weight: bold; }
+.errors-table .err-explanation { font-size: 8pt; color: #555; }
+
+.footer { position: absolute; bottom: 0; left: 0; right: 0; text-align: center; font-size: 8pt; color: #888; }
+
+@media print {
+    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
+</style>
+</head>
+<body>
+
+<div class="page">
+    <div class="header">
+        <span class="header-title">AI採点レポート</span>
+        <span class="header-meta">英語資格検定${gradeLabel} ${taskLabel} / ${theme.title}</span>
+    </div>
+
+    <div class="grade-total">
+        <div class="score">${result.totalScore}<span class="max"> / ${maxTotal}</span></div>
+        <div class="label">${pct >= 80 ? '🌟 素晴らしい！' : pct >= 60 ? '👍 良い！' : pct >= 40 ? '📝 もう少し！' : '💪 がんばろう！'}</div>
+        <div class="comment">${result.overallComment}</div>
+    </div>
+
+    <div class="student-answer-box">
+        <div class="sa-label">▼ 受験者の解答</div>
+        <div class="sa-text">${studentAnswer}</div>
+        <div class="sa-count">語数: ${countWords(studentAnswer)}語</div>
+    </div>
+
+    <table class="cat-table">
+        <thead>
+            <tr><th>観点</th><th>スコア</th><th>達成度</th><th>講評</th></tr>
+        </thead>
+        <tbody>
+            ${catRows}
+        </tbody>
+    </table>
+
+    ${result.improvedVersion ? `
+    <div class="improved-box">
+        <div class="imp-label">💡 改善例</div>
+        <div class="imp-text">${result.improvedVersion}</div>
+        <div class="imp-count">語数: ${countWords(result.improvedVersion)}語</div>
+    </div>` : ''}
+
+    ${result.errors && result.errors.length > 0 ? `
+    <div class="errors-section">
+        <div class="errors-title">✏️ 添削 (${result.errors.length}件)</div>
+        <table class="errors-table">
+            <thead>
+                <tr><th>種類</th><th>原文</th><th></th><th>修正</th><th>説明</th></tr>
+            </thead>
+            <tbody>
+                ${result.errors.map(err => {
+            const typeLabels = { spelling: 'スペル', grammar: '文法', vocabulary: '語法', punctuation: '句読点' };
+            return `<tr>
+                    <td class="err-type">${typeLabels[err.type] || err.type}</td>
+                    <td class="err-original">${err.original}</td>
+                    <td class="err-arrow">→</td>
+                    <td class="err-corrected">${err.corrected}</td>
+                    <td class="err-explanation">${err.explanation}</td>
+                </tr>`;
+        }).join('')}
+            </tbody>
+        </table>
+    </div>` : (result.errors ? `
+    <div class="errors-section">
+        <div class="errors-title">✅ 添削：ミスはありません</div>
+    </div>` : '')}
+
+    <div class="footer">© ECCベストワン藍住：北島中央</div>
+</div>
+
+</body>
+</html>`;
+
+        const printWin = window.open('', '_blank');
+        printWin.document.write(printHtml);
+        printWin.document.close();
+        printWin.onload = () => setTimeout(() => printWin.print(), 300);
     }
 
     function showGradeError(prefix, message) {
