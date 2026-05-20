@@ -1478,6 +1478,9 @@ ${getPrintStyles(minWords, maxWords)}
         let displayCtx = null;
         // Canvas上の画像の描画位置・サイズ
         let imgDrawX = 0, imgDrawY = 0, imgDrawW = 0, imgDrawH = 0;
+        // 画像補正（OCR精度向上用）
+        let brightness = 100; // 50-200, default 100
+        let contrast = 100;   // 50-200, default 100
 
         // モーダル DOM を構築
         const modal = document.createElement('div');
@@ -1492,6 +1495,35 @@ ${getPrintStyles(minWords, maxWords)}
             </div>
             <div class="crop-canvas-wrap" id="cropCanvasWrap">
                 <canvas id="cropCanvas"></canvas>
+            </div>
+            <div class="crop-adjust-panel" id="cropAdjustPanel">
+                <button class="crop-adjust-toggle" id="cropAdjustToggle">
+                    <span class="material-symbols-rounded" style="font-size:18px">tune</span>
+                    画像補正
+                    <span class="material-symbols-rounded crop-adjust-chevron" id="cropAdjustChevron" style="font-size:18px">expand_more</span>
+                </button>
+                <div class="crop-adjust-sliders" id="cropAdjustSliders" style="display:none">
+                    <div class="crop-slider-row">
+                        <label class="crop-slider-label">
+                            <span class="material-symbols-rounded" style="font-size:16px">brightness_6</span>
+                            明るさ
+                        </label>
+                        <input type="range" id="cropBrightness" class="crop-slider" min="50" max="200" value="100">
+                        <span class="crop-slider-value" id="cropBrightnessVal">100%</span>
+                    </div>
+                    <div class="crop-slider-row">
+                        <label class="crop-slider-label">
+                            <span class="material-symbols-rounded" style="font-size:16px">contrast</span>
+                            コントラスト
+                        </label>
+                        <input type="range" id="cropContrast" class="crop-slider" min="50" max="200" value="100">
+                        <span class="crop-slider-value" id="cropContrastVal">100%</span>
+                    </div>
+                    <button class="crop-adjust-reset" id="cropAdjustReset">
+                        <span class="material-symbols-rounded" style="font-size:16px">restart_alt</span>
+                        リセット
+                    </button>
+                </div>
             </div>
             <div class="crop-toolbar">
                 <button class="crop-tb-btn cancel" id="cropCancel">
@@ -1551,8 +1583,10 @@ ${getPrintStyles(minWords, maxWords)}
 
             displayCtx.clearRect(0, 0, cw, ch);
 
-            // 回転して描画
+            // 回転して描画（明るさ・コントラスト補正を適用）
+            const filterStr = `brightness(${brightness}%) contrast(${contrast}%)`;
             displayCtx.save();
+            displayCtx.filter = filterStr;
             displayCtx.translate(imgDrawX + imgDrawW / 2, imgDrawY + imgDrawH / 2);
             displayCtx.rotate(rotation * Math.PI / 180);
             if (rotation === 90 || rotation === 270) {
@@ -1671,6 +1705,43 @@ ${getPrintStyles(minWords, maxWords)}
             drawAll();
         });
 
+        // 画像補正パネル
+        const adjustToggle = modal.querySelector('#cropAdjustToggle');
+        const adjustSliders = modal.querySelector('#cropAdjustSliders');
+        const adjustChevron = modal.querySelector('#cropAdjustChevron');
+        const brightnessSlider = modal.querySelector('#cropBrightness');
+        const contrastSlider = modal.querySelector('#cropContrast');
+        const brightnessVal = modal.querySelector('#cropBrightnessVal');
+        const contrastVal = modal.querySelector('#cropContrastVal');
+
+        adjustToggle.addEventListener('click', () => {
+            const isOpen = adjustSliders.style.display !== 'none';
+            adjustSliders.style.display = isOpen ? 'none' : '';
+            adjustChevron.textContent = isOpen ? 'expand_more' : 'expand_less';
+        });
+
+        brightnessSlider.addEventListener('input', (e) => {
+            brightness = parseInt(e.target.value);
+            brightnessVal.textContent = brightness + '%';
+            drawAll();
+        });
+
+        contrastSlider.addEventListener('input', (e) => {
+            contrast = parseInt(e.target.value);
+            contrastVal.textContent = contrast + '%';
+            drawAll();
+        });
+
+        modal.querySelector('#cropAdjustReset').addEventListener('click', () => {
+            brightness = 100;
+            contrast = 100;
+            brightnessSlider.value = 100;
+            contrastSlider.value = 100;
+            brightnessVal.textContent = '100%';
+            contrastVal.textContent = '100%';
+            drawAll();
+        });
+
         // 取消
         modal.querySelector('#cropCancel').addEventListener('click', () => {
             modal.remove();
@@ -1703,11 +1774,12 @@ ${getPrintStyles(minWords, maxWords)}
                     outCanvas.width = Math.round(srcW);
                     outCanvas.height = Math.round(srcH);
 
-                    // 回転済み画像をまず中間Canvasに描画
+                    // 回転済み画像をまず中間Canvasに描画（補正も適用）
                     const tempCanvas = document.createElement('canvas');
                     tempCanvas.width = rotSize.w;
                     tempCanvas.height = rotSize.h;
                     const tempCtx = tempCanvas.getContext('2d');
+                    tempCtx.filter = `brightness(${brightness}%) contrast(${contrast}%)`;
                     tempCtx.translate(rotSize.w / 2, rotSize.h / 2);
                     tempCtx.rotate(rotation * Math.PI / 180);
                     if (rotation === 90 || rotation === 270) {
@@ -1727,17 +1799,18 @@ ${getPrintStyles(minWords, maxWords)}
                 }
             }
 
-            // クロップ範囲なし → 回転のみ適用
-            if (rotation === 0) {
+            // クロップ範囲なし → 回転・補正のみ適用
+            if (rotation === 0 && brightness === 100 && contrast === 100) {
                 // 何も変更なし
                 modal.remove();
                 onConfirm(base64, mimeType);
                 return;
             }
 
-            // 回転のみ
+            // 回転・補正のみ
             outCanvas.width = rotSize.w;
             outCanvas.height = rotSize.h;
+            outCtx.filter = `brightness(${brightness}%) contrast(${contrast}%)`;
             outCtx.translate(rotSize.w / 2, rotSize.h / 2);
             outCtx.rotate(rotation * Math.PI / 180);
             if (rotation === 90 || rotation === 270) {

@@ -215,27 +215,30 @@ function doGet(e) {
 }
 
 // ===== モデル優先順位（新しいものから） =====
-// ┌─────────────────────┬──────┬──────────┬──────┐
-// │ Model               │ RPM  │ TPM      │ RPD  │
-// ├─────────────────────┼──────┼──────────┼──────┤
-// │ gemini-3.5-flash     │   5  │ 250K     │   20 │  ← 最新だがレート制限が厳しい
-// │ gemini-3.1-flash-lite│  15  │ 250K     │  500 │  ← 高速・大量向き
-// │ gemini-3-flash       │   5  │ 250K     │   20 │
-// │ gemini-2.5-flash     │   5  │ 250K     │   20 │
-// └─────────────────────┴──────┴──────────┴──────┘
+// ┌───────────────────────────┬──────┬──────────┬──────┐
+// │ Model                     │ RPM  │ TPM      │ RPD  │
+// ├───────────────────────────┼──────┼──────────┼──────┤
+// │ gemini-3.5-flash           │   5  │ 250K     │   20 │  ← 最新だがレート制限が厳しい
+// │ gemini-3.1-flash-lite      │  15  │ 250K     │  500 │  ← 高速・大量向き
+// │ gemini-3-flash             │   5  │ 250K     │   20 │
+// │ gemini-3-flash-preview     │   5  │ 250K     │   20 │  ← 旧デフォルト
+// │ gemini-2.5-flash           │   5  │ 250K     │   20 │
+// └───────────────────────────┴──────┴──────────┴──────┘
 const GRADING_MODELS = [
-    'gemini-3.5-flash',       // 2026-05-19 GA — 最新・最高性能 (RPD:20)
-    'gemini-3.1-flash-lite',  // 2026-05-07 GA — 高速・低コスト (RPD:500)
-    'gemini-3-flash',         // 2025-12 GA — 安定版
-    'gemini-2.5-flash',       // レガシー（フォールバック用）
+    'gemini-3.5-flash',           // 2026-05-19 GA — 最新・最高性能 (RPD:20)
+    'gemini-3.1-flash-lite',      // 2026-05-07 GA — 高速・低コスト (RPD:500)
+    'gemini-3-flash',             // 2025-12 GA — 安定版
+    'gemini-3-flash-preview',     // preview版 — 旧デフォルト
+    'gemini-2.5-flash',           // レガシー（フォールバック用）
 ];
 
 // モデルIDからユーザー向け表示名を返す
 const MODEL_DISPLAY_NAMES = {
-    'gemini-3.5-flash':      'Gemini 3.5 Flash',
-    'gemini-3.1-flash-lite': 'Gemini 3.1 Flash Lite',
-    'gemini-3-flash':        'Gemini 3 Flash',
-    'gemini-2.5-flash':      'Gemini 2.5 Flash',
+    'gemini-3.5-flash':          'Gemini 3.5 Flash',
+    'gemini-3.1-flash-lite':     'Gemini 3.1 Flash Lite',
+    'gemini-3-flash':            'Gemini 3 Flash',
+    'gemini-3-flash-preview':    'Gemini 3 Flash (Preview)',
+    'gemini-2.5-flash':          'Gemini 2.5 Flash',
 };
 function getModelDisplayName(modelId) {
     return MODEL_DISPLAY_NAMES[modelId] || modelId;
