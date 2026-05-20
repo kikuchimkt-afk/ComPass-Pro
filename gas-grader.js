@@ -214,8 +214,35 @@ function doGet(e) {
     return jsonResponse({ status: 'ok', message: 'ComPass Pro Grader API is running.' });
 }
 
-// ===== Gemini API フェッチラッパー（複数キーのフォールバック対応） =====
-function fetchGeminiWithRetry(model, payload) {
+// ===== モデル優先順位（新しいものから） =====
+// ┌─────────────────────┬──────┬──────────┬──────┐
+// │ Model               │ RPM  │ TPM      │ RPD  │
+// ├─────────────────────┼──────┼──────────┼──────┤
+// │ gemini-3.5-flash     │   5  │ 250K     │   20 │  ← 最新だがレート制限が厳しい
+// │ gemini-3.1-flash-lite│  15  │ 250K     │  500 │  ← 高速・大量向き
+// │ gemini-3-flash       │   5  │ 250K     │   20 │
+// │ gemini-2.5-flash     │   5  │ 250K     │   20 │
+// └─────────────────────┴──────┴──────────┴──────┘
+const GRADING_MODELS = [
+    'gemini-3.5-flash',       // 2026-05-19 GA — 最新・最高性能 (RPD:20)
+    'gemini-3.1-flash-lite',  // 2026-05-07 GA — 高速・低コスト (RPD:500)
+    'gemini-3-flash',         // 2025-12 GA — 安定版
+    'gemini-2.5-flash',       // レガシー（フォールバック用）
+];
+
+// モデルIDからユーザー向け表示名を返す
+const MODEL_DISPLAY_NAMES = {
+    'gemini-3.5-flash':      'Gemini 3.5 Flash',
+    'gemini-3.1-flash-lite': 'Gemini 3.1 Flash Lite',
+    'gemini-3-flash':        'Gemini 3 Flash',
+    'gemini-2.5-flash':      'Gemini 2.5 Flash',
+};
+function getModelDisplayName(modelId) {
+    return MODEL_DISPLAY_NAMES[modelId] || modelId;
+}
+
+// ===== Gemini API フェッチラッパー（複数モデル＋複数キーのフォールバック対応） =====
+function fetchGeminiWithRetry(requestedModel, payload) {
     const primaryKey = PropertiesService.getScriptProperties().getProperty('GEMINI_API_KEY');
     
     // 代替キーもスクリプトプロパティから取得（ソースコードに直書きしない）
@@ -236,45 +263,60 @@ function fetchGeminiWithRetry(model, payload) {
         return { error: { message: 'APIキーが設定されていません。' } };
     }
 
-    let lastError = null;
-
-    for (let i = 0; i < keysToTry.length; i++) {
-        const apiKey = keysToTry[i];
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-        
-        const options = {
-            method: 'post',
-            contentType: 'application/json',
-            payload: JSON.stringify(payload),
-            muteHttpExceptions: true
-        };
-
-        try {
-            const response = UrlFetchApp.fetch(url, options);
-            const code = response.getResponseCode();
-            const jsonText = response.getContentText();
-            let json = {};
-            
-            try {
-                json = JSON.parse(jsonText);
-            } catch (e) {
-                lastError = "Response parsing failed: " + jsonText.substring(0, 50);
-                continue;
-            }
-
-            if (code === 200 && !json.error) {
-                return json; // 成功
-            }
-
-            lastError = json.error ? json.error.message : `HTTP Error ${code}`;
-            // 次のキーへ（429以外でもエラーなら切り替える）
-            
-        } catch (e) {
-            lastError = "Network error: " + e.message;
-        }
+    // モデルの優先順位リストを構築（引数モデルがリストにあればそこから、なければ先頭に追加）
+    let modelsToTry = GRADING_MODELS.slice();
+    if (requestedModel && modelsToTry.indexOf(requestedModel) === -1) {
+        modelsToTry.unshift(requestedModel);
     }
 
-    return { error: { message: 'すべてのAPIキーでリトライに失敗しました: ' + lastError } };
+    let lastError = null;
+
+    // モデル → キーの順でフォールバック
+    for (let m = 0; m < modelsToTry.length; m++) {
+        const model = modelsToTry[m];
+        for (let i = 0; i < keysToTry.length; i++) {
+            const apiKey = keysToTry[i];
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+            
+            const options = {
+                method: 'post',
+                contentType: 'application/json',
+                payload: JSON.stringify(payload),
+                muteHttpExceptions: true
+            };
+
+            try {
+                const response = UrlFetchApp.fetch(url, options);
+                const code = response.getResponseCode();
+                const jsonText = response.getContentText();
+                let json = {};
+                
+                try {
+                    json = JSON.parse(jsonText);
+                } catch (e) {
+                    lastError = `[${model}] Response parsing failed: ` + jsonText.substring(0, 50);
+                    continue;
+                }
+
+                if (code === 200 && !json.error) {
+                    // 成功 — どのモデルが使われたかをログに記録 & レスポンスに付与
+                    console.log(`AI採点: ${model} で成功 (key ${i + 1}/${keysToTry.length})`);
+                    json._modelUsed = model;
+                    return json;
+                }
+
+                lastError = `[${model}] ` + (json.error ? json.error.message : `HTTP Error ${code}`);
+                // 次のキーへ（429以外でもエラーなら切り替える）
+                
+            } catch (e) {
+                lastError = `[${model}] Network error: ` + e.message;
+            }
+        }
+        // このモデルの全キーが失敗 → 次のモデルへフォールバック
+        console.log(`AI採点: ${model} 失敗、次のモデルへフォールバック...`);
+    }
+
+    return { error: { message: 'すべてのモデル・APIキーでリトライに失敗しました: ' + lastError } };
 }
 
 // ===== Gemini API 呼び出し =====
@@ -335,7 +377,7 @@ function gradeWithGemini(passage, modelAnswer, studentAnswer, passageJa, gradeId
         }
     };
 
-    const json = fetchGeminiWithRetry('gemini-3-flash-preview', payload);
+    const json = fetchGeminiWithRetry(GRADING_MODELS[0], payload);
 
     if (json.error) {
         return { error: 'Gemini APIエラー: ' + json.error.message };
@@ -343,7 +385,9 @@ function gradeWithGemini(passage, modelAnswer, studentAnswer, passageJa, gradeId
 
     try {
         const text = json.candidates[0].content.parts[0].text;
-        return JSON.parse(text);
+        const result = JSON.parse(text);
+        result.modelUsed = getModelDisplayName(json._modelUsed);
+        return result;
     } catch (parseErr) {
         return { error: 'レスポンスの解析に失敗しました。' };
     }
@@ -404,7 +448,7 @@ function gradeSentenceWithGemini(sentenceJa, modelAnswer, studentAnswer, gradeId
         }
     };
 
-    const json = fetchGeminiWithRetry('gemini-3-flash-preview', payload);
+    const json = fetchGeminiWithRetry(GRADING_MODELS[0], payload);
 
     if (json.error) {
         return { error: 'Gemini APIエラー: ' + json.error.message };
@@ -412,7 +456,9 @@ function gradeSentenceWithGemini(sentenceJa, modelAnswer, studentAnswer, gradeId
 
     try {
         const text = json.candidates[0].content.parts[0].text;
-        return JSON.parse(text);
+        const result = JSON.parse(text);
+        result.modelUsed = getModelDisplayName(json._modelUsed);
+        return result;
     } catch (parseErr) {
         return { error: 'レスポンスの解析に失敗しました。' };
     }
@@ -458,7 +504,7 @@ ${question}
         }
     };
 
-    const json = fetchGeminiWithRetry('gemini-3-flash-preview', payload);
+    const json = fetchGeminiWithRetry(GRADING_MODELS[0], payload);
 
     if (json.error) {
         return { error: 'Gemini APIエラー: ' + json.error.message };
@@ -466,7 +512,9 @@ ${question}
 
     try {
         const text = json.candidates[0].content.parts[0].text;
-        return JSON.parse(text);
+        const result = JSON.parse(text);
+        result.modelUsed = getModelDisplayName(json._modelUsed);
+        return result;
     } catch (parseErr) {
         return { error: 'レスポンスの解析に失敗しました。' };
     }
@@ -494,7 +542,7 @@ function ocrWithGemini(imageBase64, mimeType) {
         }
     };
 
-    const json = fetchGeminiWithRetry('gemini-3-flash-preview', payload);
+    const json = fetchGeminiWithRetry(GRADING_MODELS[0], payload);
 
     if (json.error) {
         return { error: 'OCRエラー: ' + json.error.message };
@@ -502,7 +550,7 @@ function ocrWithGemini(imageBase64, mimeType) {
 
     try {
         const text = json.candidates[0].content.parts[0].text;
-        return { text: text.trim() };
+        return { text: text.trim(), modelUsed: getModelDisplayName(json._modelUsed) };
     } catch (parseErr) {
         return { error: '画像からテキストを読み取れませんでした。' };
     }

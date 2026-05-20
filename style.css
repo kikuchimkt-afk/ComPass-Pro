@@ -1194,6 +1194,20 @@ body {
     line-height: 1.5;
 }
 
+.grade-model-badge {
+    display: inline-block;
+    margin-top: 8px;
+    padding: 3px 10px;
+    font-size: 0.68rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    opacity: 0.8;
+    letter-spacing: 0.02em;
+}
+
 .grade-categories {
     display: flex;
     flex-direction: column;

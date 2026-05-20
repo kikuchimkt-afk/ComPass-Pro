@@ -1040,6 +1040,7 @@ ${getPrintStyles(minWords, maxWords)}
                             <span class="material-symbols-rounded" style="font-size:18px">${diffIcon}</span>
                             ${resultTitle}（スコア: ${result.score}/100）
                         </div>
+                        ${result.modelUsed ? `<div style="font-size:0.7rem; color:var(--text-secondary); margin-top:4px; opacity:0.7">🤖 ${result.modelUsed}</div>` : ''}
                         
                         <!-- 先生のコメント -->
                         <div class="trans-drill-answer-row" style="margin-top:8px; margin-bottom:12px">
@@ -1875,6 +1876,7 @@ ${getPrintStyles(minWords, maxWords)}
                     </div>
                     <div class="grade-label" style="color:${gradeColors[grade]}">${gradeLabels[grade]}</div>
                     <div class="grade-comment">${result.overallComment}</div>
+                    ${result.modelUsed ? `<div class="grade-model-badge">🤖 ${result.modelUsed}</div>` : ''}
                 </div>
 
                 <div class="grade-highlight-hint">
